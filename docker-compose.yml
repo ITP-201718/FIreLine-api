@@ -1,0 +1,14 @@
+version: '3'
+services:
+  crossbar:
+    image: "crossbario/crossbar"
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/node
+      - ../node/build:/www
+    user: "1000"
+  node-api:
+    build: ./node
+    volumes:
+     - ./node:/node

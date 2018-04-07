@@ -1,0 +1,137 @@
+{
+  "version": 2,
+  "workers": [
+    {
+      "type": "router",
+      "realms": [
+        {
+          "name": "fireline",
+          "roles": [
+            {
+              "name": "server",
+              "permissions": [
+                {
+                  "uri": "io.fireline.server.stop",
+                  "match": "exact",
+                  "allow": {
+                    "register": true,
+                    "call": true
+                  }
+                },
+                {
+                  "uri": "io.fireline.server.authenticate",
+                  "match": "exact",
+                  "allow": {
+                    "register": true
+                  }
+                },
+                {
+                  "uri": "io.fireline.server.authorization",
+                  "match": "exact",
+                  "allow": {
+                    "register": true
+                  }
+                },
+                {
+                  "uri": "io.fireline.api.profile.create_user",
+                  "match": "exact",
+                  "allow": {
+                    "call": true,
+                    "register": true
+                  }
+                },
+                {
+                  "uri": "io.fireline.api",
+                  "match": "prefix",
+                  "allow": {
+                    "register": true,
+                    "publish": true
+                  }
+                }
+              ]
+            },
+            {
+              "name": "user",
+              "permissions": [
+                {
+                  "uri": "io.fireline.api",
+                  "match": "prefix",
+                  "allow": {
+                    "call": true,
+                    "subscribe": true
+                  },
+                  "disclose": {
+                    "caller": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "transports": [
+        {
+          "type": "web",
+          "endpoint": {
+            "type": "tcp",
+            "port": 8080
+          },
+          "paths": {
+            "test": {
+              "type": "static",
+              "directory": "./test"
+            },
+            "api": {
+              "type": "websocket",
+              "options": {
+                "auto_ping_interval": 10000,
+                "auto_ping_timeout": 5000,
+                "auto_ping_size": 4
+              },
+              "serializers": [
+                "json"
+              ],
+              "auth": {
+                "ticket": {
+                  "type": "dynamic",
+                  "authenticator": "io.fireline.server.authenticate"
+                }
+              }
+            },
+            "server": {
+              "type": "websocket",
+              "options": {
+                "auto_ping_interval": 10000,
+                "auto_ping_timeout": 5000,
+                "auto_ping_size": 4
+              },
+              "serializers": [
+                "json"
+              ],
+              "auth": {
+                "ticket": {
+                  "type": "static",
+                  "principals": {
+                    "server": {
+                      "ticket": "server",
+                      "role": "server"
+                    }
+                  }
+                },
+                "wampcra": {
+                  "type": "static",
+                  "users": {
+                    "server": {
+                      "secret": "server",
+                      "role": "server"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

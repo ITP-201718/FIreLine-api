@@ -10,6 +10,7 @@ const autobahn = require('autobahn')
 
 let logger = null
 let sql_connection = null
+let sql_interval = null
 let autobahn_connection = null
 let session = null
 
@@ -42,6 +43,22 @@ async function connectWamp() {
 
         connection.open()
     })
+}
+
+async function connectSql() {
+    sql_connection = await mysql.createConnection({ ...config.mysql, namedPlaceholders: true})
+    console.log("Connected to Mysql")
+
+    sql_interval = setInterval(async () => {
+        try {
+            await sql_connection.ping()
+        } catch (e) {
+            console.log('Connection to mysql lost. Trying to reconnect')
+            sql_connection = null
+            clearInterval(sql_interval)
+            connectSql()
+        }
+    }, 1000)
 }
 
 async function loadModules(path, base_uri) {
@@ -126,8 +143,7 @@ async function connect() {
     // Wait for crossbar to start in docker-compose
     await sleep(5000)
 
-    sql_connection = await mysql.createConnection({ ...config.mysql, namedPlaceholders: true})
-    console.log("Connected to Mysql")
+    await connectSql()
 
     let [_autobahn_connection, _session] = await connectWamp()
     autobahn_connection = _autobahn_connection

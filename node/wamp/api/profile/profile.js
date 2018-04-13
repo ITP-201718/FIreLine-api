@@ -6,9 +6,6 @@ const helpers = require('../../helpers')
 
 async function register (conf) {
 
-    /*await helpers.register_authid_mysql(conf.uri + '.get_name',
-        'SELECT `name` FROM `users` WHERE `username` = :caller', 'name')*/
-
     await helpers.register_authid_mysql(conf.uri + '.get_vname',
         'SELECT vname FROM user WHERE uname = :caller', 'vname')
 
@@ -18,9 +15,13 @@ async function register (conf) {
     await helpers.register_authid_mysql(conf.uri + '.get_mail',
         'SELECT `mail` FROM `user` WHERE `uname` = :caller', 'mail')
 
-
-
-
+    /**
+     * Set mail of the current user
+     * @param args
+     * @param kwargs
+     * @param details
+     * @returns {Promise<boolean>}
+     */
     async function setMail(args, kwargs, details) {
         args = {
             uname: details.caller_authid,
@@ -47,6 +48,13 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.set_mail', setMail)
 
+    /**
+     * Set firstname of the current user
+     * @param args
+     * @param kwargs
+     * @param details
+     * @returns {Promise<boolean>}
+     */
     async function setVName(args, kwargs, details) {
         args = {
             uname: details.caller_authid,
@@ -72,6 +80,13 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.set_vname', setVName)
 
+    /**
+     * Set lastname of the current user
+     * @param args
+     * @param kwargs
+     * @param details
+     * @returns {Promise<boolean>}
+     */
     async function setNName(args, kwargs, details) {
         args = {
             uname: details.caller_authid,
@@ -97,11 +112,20 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.set_nname', setNName)
 
+    /**
+     * Set the gender of the User
+     * @param args
+     * @param kwargs
+     * @param details
+     * @returns {Promise<boolean>}
+     */
     async function setGeschlecht(args, kwargs, details) {
+
         args = {
             uname: details.caller_authid,
             ...kwargs
         }
+
         const constraints = {
             gender: {
                 presence: {message: '^You must choose a gender', allowEmpty: false},
@@ -112,14 +136,21 @@ async function register (conf) {
                 presence: true,
             }
         }
+
         await helpers.validate(args, constraints)
         
         const {uname, gender} = args
-        //Need to change helpers.executeUpdate
+        await helpers.executeUpdate(helpers.createJoinedTable('user', 'mitglied', 'uid'), {uname}, {geschlecht: gender})
         
-        return false
+        return true
     }
-    
+
+    /**
+     * Creates a new user
+     * @param args
+     * @param kwargs
+     * @returns {Promise<boolean>}
+     */
     async function createUser(args, kwargs) {
         const constraints = {
             username: {
@@ -158,7 +189,20 @@ async function register (conf) {
             mail: validate.isEmpty(kwargs.mail) ? undefined : kwargs.mail,
         }
 
+        await conf.sql_connection.beginTransaction()
         await helpers.executeInsert('user', userInsert)
+        await helpers.executeInsert('mitglied', {
+            uid: {raw: true, value: 'LAST_INSERT_ID()'},
+            gebdat: '2000-04-30',
+            zugehoerigkeit: 'Extern',
+            geschlecht: 'M',
+        })
+        try {
+            await conf.sql_connection.commit();
+        } catch (e) {
+            await conf.sql_connection.rollback();
+            throw new Error('io.fireline.error.internal_server_error', ['Internal server error (1020)'])
+        }
 
         return true
     }

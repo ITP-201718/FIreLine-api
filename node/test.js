@@ -36,20 +36,28 @@ let connection = new autobahn.Connection({
     onchallenge,
 })
 
+ran_create = false
+
 connection.onopen = async (session) => {
     console.log("Autobahn connection open")
+
+    if(ran_create) {
+        return
+    }
+
+    ran_create = true
 
     try {
         //console.log(await session.call('io.fireline.api.profile.get_name', []))
         //console.log(await session.call('io.fireline.api.profile.get_mail', []))
 
         session.call('io.fireline.api.profile.create_user', [], {
-            username: 'oguz',
-            password: 'oguzPass',
-            confirmPassword: 'oguzPass',
-            first_name: 'Oguzhan',
-            last_name: 'Guenguer',
-            mail: 'hallo@test.txtx',
+            username: 'test',
+            password: 'testPass',
+            confirmPassword: 'testPass',
+            first_name: 'Test',
+            last_name: 'Test',
+            mail: 'test@test.priv',
         }).then(
             function (result) {
                 console.log("create_user", result)

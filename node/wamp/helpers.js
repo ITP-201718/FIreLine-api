@@ -69,10 +69,15 @@ async function s_register(uri, func) {
     console.log("Successfully Registered: '" + uri + "'")
 }
 
+/**
+ * Generates Sql Data set ( (column, column2, ...)
+ * @param values
+ * @returns {string|string}
+ */
 function generateSqlDataSet(values) {
     let ret = '('
-    for(let i in values) {
-        ret += "`" + values[i] + "`, "
+    for(let i of values) {
+        ret += "`" + i + "`, "
     }
     ret = ret.slice(0, -2) + ')'
     return ret
@@ -82,8 +87,18 @@ function generateSqlDataValueSet(values) {
     let keys = Object.keys(values)
     let dataSet = generateSqlDataSet(keys)
     let valueSet = '('
-    for(let i in keys) {
-        valueSet += ':' + keys[i] + ', '
+    for(let i of keys) {
+        let val = values[i]
+        let value = ':' + i + ', '
+        if(validatejs.isObject(val)) {
+            if(!!val.raw) {
+                value = val.value + ', '
+            } else {
+                value = ':' + val.value + ', '
+            }
+            values[i] = val.value
+        }
+        valueSet += value
     }
     valueSet = valueSet.slice(0, -2) +')'
     return {
@@ -96,7 +111,6 @@ function generateSqlDataValueSet(values) {
 function generateUpdateDataValueSet(table, values, check) {
     let sql = "UPDATE " + table + " SET "
     check = generateCheckSet(check)
-
 }
 
 function generateSetSet(values) {
@@ -127,6 +141,10 @@ function generateUpdateSet(table, check, values) {
     let checkSet = generateCheckSet(check)
     sql += setSet.sql + " " + checkSet.sql
     return {sql, values: {...setSet.setValues, ...checkSet.checkValues}}
+}
+
+function createJoinedTable(t1, t2, on) {
+    return t1 + ' INNER JOIN ' + t2 + ' ON ' + t1 + '.' + on + ' = ' + t2 + '.' + on
 }
 
 async function executeUpdate(table, check, values) {
@@ -184,6 +202,7 @@ module.exports = {
     generateCheckSet,
     generateSetSet,
     generateInsert,
+    createJoinedTable,
     executeUpdate,
     executeInsert,
     validate,

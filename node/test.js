@@ -43,12 +43,13 @@ connection.onopen = async (session) => {
         //console.log(await session.call('io.fireline.api.profile.get_name', []))
         //console.log(await session.call('io.fireline.api.profile.get_mail', []))
 
-        /*session.call('io.fireline.api.profile.create_user', [], {
+        session.call('io.fireline.api.profile.create_user', [], {
             username: 'oguz',
             password: 'oguzPass',
+            confirmPassword: 'oguzPass',
             first_name: 'Oguzhan',
-            last_name: 'Güngür',
-            mail: 'oguenguer@student.tgm.ac.at',
+            last_name: 'Guenguer',
+            mail: 'hallo@test.txtx',
         }).then(
             function (result) {
                 console.log("create_user", result)
@@ -56,12 +57,12 @@ connection.onopen = async (session) => {
             function (error) {
                 console.error("create_user", error)
             }
-        )*/
+        )
 
-        console.log(await session.call('io.fireline.api.profile.set_mail', [], {mail: 'david@langheiter.com'}))
+        /*console.log(await session.call('io.fireline.api.profile.set_mail', [], {mail: 'david@langheiter.com'}))
         console.log(await session.call('io.fireline.api.profile.get_mail', []))
         console.log(await session.call('io.fireline.api.profile.set_name', [], {name: 'David Langheiter'}))
-        console.log(await session.call('io.fireline.api.profile.get_name', []))
+        console.log(await session.call('io.fireline.api.profile.get_name', []))*/
     } catch (err) {
         console.error(err)
     }

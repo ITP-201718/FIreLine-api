@@ -14,6 +14,7 @@ let autobahn_connection = null
 let session = null
 
 async function connectWamp() {
+    console.log("Trying to connect to " + config.wamp.url)
     return new Promise((resolve, reject) => {
         let onchallenge = (session, method, extra) => {
             if(method === 'wampcra') {

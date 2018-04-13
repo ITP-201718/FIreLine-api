@@ -6,7 +6,6 @@ services:
       - "8080:8080"
     volumes:
       - .:/node
-      - ../node/build:/www
     user: "1000"
   node-api:
     build: ./node

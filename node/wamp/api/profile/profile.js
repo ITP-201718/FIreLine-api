@@ -97,6 +97,29 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.set_nname', setNName)
 
+    async function setGeschlecht(args, kwargs, details) {
+        args = {
+            uname: details.caller_authid,
+            ...kwargs
+        }
+        const constraints = {
+            gender: {
+                presence: {message: '^You must choose a gender', allowEmpty: false},
+                length: {is: 1},
+            },
+            uname: {
+                inDB: {table: 'user', message: '^Username does not exists'},
+                presence: true,
+            }
+        }
+        await helpers.validate(args, constraints)
+        
+        const {uname, gender} = args
+        //Need to change helpers.executeUpdate
+        
+        return false
+    }
+    
     async function createUser(args, kwargs) {
         const constraints = {
             username: {

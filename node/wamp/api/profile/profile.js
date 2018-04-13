@@ -10,10 +10,10 @@ async function register (conf) {
         'SELECT `name` FROM `users` WHERE `username` = :caller', 'name')*/
 
     await helpers.register_authid_mysql(conf.uri + '.get_vname',
-        'SELECT vname FROM mitglied INNER JOIN user ON user.uid = mitglied.uid WHERE uname = :caller', 'vname')
+        'SELECT vname FROM user WHERE uname = :caller', 'vname')
 
     await helpers.register_authid_mysql(conf.uri + '.get_nname',
-        'SELECT nname FROM mitglied INNER JOIN user ON user.uid = mitglied.uid WHERE uname = :caller', 'nname')
+        'SELECT nname FROM user WHERE uname = :caller', 'nname')
 
     await helpers.register_authid_mysql(conf.uri + '.get_mail',
         'SELECT `mail` FROM `user` WHERE `uname` = :caller', 'mail')
@@ -47,9 +47,6 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.set_mail', setMail)
 
-
-
-
     async function setVName(args, kwargs, details) {
         args = {
             uname: details.caller_authid,
@@ -74,6 +71,31 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.set_vname', setVName)
+
+    async function setNName(args, kwargs, details) {
+        args = {
+            uname: details.caller_authid,
+            ...kwargs
+        }
+
+        const constraints = {
+            nname: {
+                presence: {message: '^You must enter a valid name', allowEmpty: false},
+            },
+            uname: {
+                inDB: {table: 'user', message: '^Username does not exists'},
+                presence: true,
+            }
+        }
+
+        await helpers.validate(args, constraints)
+
+        const {uname, nname} = args
+        await helpers.executeUpdate('user', {uname}, {nname})
+
+        return true
+    }
+    await helpers.s_register(conf.uri + '.set_nname', setNName)
 
     async function createUser(args, kwargs) {
         const constraints = {

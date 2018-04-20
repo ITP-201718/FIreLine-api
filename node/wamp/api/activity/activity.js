@@ -39,7 +39,7 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.create_aktivitaet', createAktivitaet())
 
-    async function update(args, kwargs){
+    async function updateAktivitaet(args, kwargs){
         const constraints = {
             von: {
                 presence: { message: '^You must choose a from date' },
@@ -62,6 +62,7 @@ async function register (conf) {
         helpers.executeUpdate('aktivitaet', {id}, {von, bis, taetigkeit})
         return true
     }
+    await helpers.s_register(conf.uri + '.update_aktivitaet', updateAktivitaet())
 }
 
 module.exports = {register}

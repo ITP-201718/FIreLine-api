@@ -144,6 +144,7 @@ async function register (conf) {
         
         return true
     }
+    helpers.s_register(conf.uri + '.set_gender', setGeschlecht)
 
     /**
      * Creates a new user

@@ -146,6 +146,55 @@ async function register (conf) {
     }
     helpers.s_register(conf.uri + '.set_gender', setGeschlecht)
 
+    async function  setGebDat(args, kwargs, details) {
+        args = {
+            uname: details.caller_authid,
+            ...kwargs
+        }
+
+        const constraints = {
+            gebdat: {
+                presence: {message: '^You must choose a date of birth' },
+                date: true,
+            },
+            uname: {
+                inDB: {table: 'user', message: '^Username does not exists' },
+                presence: true,
+            }
+        }
+
+        await helpers.validate(args, constraints)
+
+        const {uname, gebdat} = args
+        await helpers.executeUpdate(helpers.createJoinedTable('user', 'mitglied', 'uid'), {uname}, {gebdat})
+
+        return true
+    }
+
+    async function setZugehoerigkeit(args, kwargs, details) {
+        args = {
+            uname: details.caller_authid,
+            ...kwargs
+        }
+
+        const constraints = {
+            zugehoerigkeit: {
+                presence: { message: '^You must choose a membership' }
+            },
+            uname: {
+                inDB: {table: 'user', message: '^Username does not exists' },
+                presence: true,
+            }
+        }
+
+        await helpers.validate(args, constraints)
+
+        const {uname, zugehoerigkeit} = args
+        await helpers.executeUpdate(helpers.createJoinedTable('user', 'mitglied', 'uid'), {uname}, {zugehoerigkeit})
+
+        return true
+    }
+
     /**
      * Creates a new user
      * @param args
@@ -178,6 +227,20 @@ async function register (conf) {
                 email: true,
                 notInDB: { table: 'user' }
             },
+            geschlecht: {
+                presence: { message: '^You must pick a gender' },
+                inclusion: {
+                    within: ['m','w','o'],
+                    message: '^You must pick a valid gender'
+                }
+            },
+            gebdat: {
+                presence: { message: '^You must pick a birth date' },
+                date: true,
+            },
+            zugehoerigkeit: {
+                presence: { message: '^You must pick a membership' }
+            }
         }
 
         await helpers.validate(kwargs, constraints)
@@ -194,9 +257,9 @@ async function register (conf) {
         await helpers.executeInsert('user', userInsert)
         await helpers.executeInsert('mitglied', {
             uid: {raw: true, value: 'LAST_INSERT_ID()'},
-            gebdat: '2000-04-30',
-            zugehoerigkeit: 'Extern',
-            geschlecht: 'M',
+            gebdat: kwargs.gebdat,
+            zugehoerigkeit: kwargs.zugehoerigkeit,
+            geschlecht: kwargs.gender,
         })
         try {
             await conf.sql_connection.commit();

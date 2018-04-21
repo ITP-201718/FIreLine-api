@@ -30,7 +30,7 @@ async function register (conf) {
         let aktivitaetInsert = {
             von: kwargs.von,
             bis: kwargs.bis,
-            aktivitaet: kwargs.aktivitaet
+            taetigkeit: kwargs.taetigkeit
         }
 
         await helpers.executeInsert('aktivitaet', aktivitaetInsert)

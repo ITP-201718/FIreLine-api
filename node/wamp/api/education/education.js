@@ -43,7 +43,7 @@ async function register (conf){
                 presence: { message: '^You must choose a name' }
             },
             id: {
-                presence: { message: 'Internal Server Error' }
+                presence: { message: 'Internal Server Error' },
                 numericality: { onlyInteger: true }
             }
         }
@@ -52,6 +52,28 @@ async function register (conf){
         helpers.executeUpdate('ausbildung', {id},{name})
         return true
     }
+    await helpers.s_register(conf.uri + '.update_Ausbildung', updateAusbildung())
+
+    /**
+     * Removes an existing Education
+     * @param args
+     * @param kwargs
+     * @returns {Promise<boolean>}
+     */
+
+    async function removeAusbildung(args, kwargs){
+        const contraints = {
+            id: {
+                presence: { message: 'Internal Server Error' },
+                numericality: { onlyInteger: true }
+            }
+        }
+        await helpers.validate(kwargs, contraints)
+        const {id} = kwargs
+        await helpers.execute('DELETE FROM ausbildung WHERE auid = :id', {id})
+        return true
+    }
+    await helpers.s_register(conf.uri + '.remove_Ausbildung', removeAusbildung())
 }
 
 module.exports = {register}

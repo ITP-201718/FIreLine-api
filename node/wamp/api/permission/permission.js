@@ -59,7 +59,29 @@ async function register (conf) {
         helpers.executeUpdate('berechtigung', {id}, {uri,mame})
         return true
     }
-    await helpers.s_register(conf.uri + '.update_berechtigung' updateBerechtigung())
+    await helpers.s_register(conf.uri + '.update_berechtigung', updateBerechtigung())
+
+    /**
+     * Removes an existing Permission
+     * @param args
+     * @param kwargs
+     * @returns {Promise<void>}
+     */
+
+    async function removeBerechtigung(args, kwargs) {
+        const constraints = {
+            id: {
+                presence : { message: '^Internal Server Error' }
+                numericality: {onlyInteger: true}
+            }
+        }
+
+        await helpers.validate(kwargs, constraints)
+        const {id} = kwargs
+        await helpers.execute('DELETE FROM berechtigung WHERE bid = :id', {id})
+        return true
+    }
+    await helpers.s_register(conf.uri + '.remove_Berechtigung', removeBerechtigung())
 }
 
 module.exports = {register}

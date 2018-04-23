@@ -146,7 +146,7 @@ async function register (conf) {
     }
     helpers.s_register(conf.uri + '.set_gender', setGeschlecht)
 
-    async function  setGebDat(args, kwargs, details) {
+    async function setGebDat(args, kwargs, details) {
         args = {
             uname: details.caller_authid,
             ...kwargs
@@ -165,11 +165,12 @@ async function register (conf) {
 
         await helpers.validate(args, constraints)
 
-        const {uname, gebdat} = args
+        const {gebdat, uname} = args
         await helpers.executeUpdate(helpers.createJoinedTable('user', 'mitglied', 'uid'), {uname}, {gebdat})
 
         return true
     }
+    await helpers.s_register(conf.uri + '.set_gebdat', setGebDat())
 
     async function setZugehoerigkeit(args, kwargs, details) {
         args = {
@@ -194,6 +195,7 @@ async function register (conf) {
 
         return true
     }
+    await helpers.s_register(conf.uri + '.set_Zugehoerigkeit', setZugehoerigkeit())
 
     /**
      * Creates a new user

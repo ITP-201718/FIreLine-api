@@ -70,6 +70,27 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.update_aktivitaet', updateAktivitaet())
+
+    /**
+     * Removes an existing Activity
+     * @param args
+     * @param kwargs
+     * @returns {Promise<boolean>}
+     */
+
+    async function removeAktivitaet(args, kwargs){
+        const constraints = {
+            id: {
+                presence: { message: '^Internal Server Error'},
+                numericality: {onlyInteger: true}
+            }
+        }
+        helpers.validate(kwargs, constraints)
+        const {id} = kwargs
+        await helpers.execute('DELETE FROM aktivitaet WHERE aid = :id', {id})
+        return true
+    }
+    await helpers.s_register(conf.uri + '.remove_Aktivitaet', removeAktivitaet())
 }
 
 module.exports = {register}

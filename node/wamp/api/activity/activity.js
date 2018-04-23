@@ -39,6 +39,13 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.create_aktivitaet', createAktivitaet())
 
+    /**
+     * Updates an existing Activity
+     * @param args
+     * @param kwargs
+     * @returns {Promise<boolean>}
+     */
+
     async function updateAktivitaet(args, kwargs){
         const constraints = {
             von: {

@@ -34,6 +34,13 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.create_rank', createRank())
 
+    /**
+     * Updates an existing Rank
+     * @param args
+     * @param kwargs
+     * @returns {Promise<boolean>}
+     */
+
     async function updateRank(args, kwargs) {
         const constraints = {
             name: {

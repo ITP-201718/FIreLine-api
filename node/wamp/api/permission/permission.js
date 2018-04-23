@@ -34,6 +34,13 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.create_berechtigung', createBerechtigung())
 
+    /**
+     * Updates an existing Permission
+     * @param args
+     * @param kwargs
+     * @returns {Promise<boolean>}
+     */
+
     async function updateBerechtigung(args, kwargs){
         const constraints = {
             uri: {

@@ -1,2 +1,4 @@
-/.idea
-/node/config.js
+.idea
+node/config.js
+node/node_modules
+node/test.js

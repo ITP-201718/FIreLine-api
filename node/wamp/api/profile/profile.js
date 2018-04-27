@@ -176,7 +176,7 @@ async function register (conf) {
             },
             mail: {
                 email: true,
-                notInDB: { table: 'user' }
+                notInDB: { table: 'user', message: '^Email does already exist'}
             },
         }
 

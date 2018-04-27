@@ -1,3 +1,4 @@
+const moment = require('moment')
 let validatejs = require('validate.js')
 const {validators} = validatejs
 const {
@@ -5,6 +6,17 @@ const {
 } = require('./helpers')
 
 function register_validators() {
+    validatejs.extend(validatejs.validators.datetime, {
+        parse: (value, options) => {
+            return moment.utc(value)
+        },
+
+        format: (value, options) => {
+            let format = options.dateOnly ? "YYYY-MM-DD" : "YYYY-MM-DD hh:mm:ss";
+            return moment.utc(value).format(format);
+        }
+    })
+
     validators.notInDB = async (value, options, key) => {
         if(validatejs.isEmpty(options.table)) {
             throw 'notInDB: Not all required options where set'

@@ -25,6 +25,7 @@ async function register (conf) {
                 presence: { message: '^You must choose a activity'}
             }
         }
+
         await helpers.validate(kwargs, constraints)
 
         let aktivitaetInsert = {

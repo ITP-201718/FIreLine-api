@@ -22,17 +22,28 @@ let onchallenge = (session, method, extra) => {
         //return autobahn.auth_cra.sign("f8K8A^5QkM@j}Dgmp\"rq'{R97y94f/8+", extra.challenge)
         return autobahn.auth_cra.sign("123sekret", extra.challenge)
     } else if (method === 'ticket') {
+<<<<<<< HEAD
         return "chrisPass"
+=======
+        return "davidPass"
+>>>>>>> Added validate support for datatime
     } else {
         throw Error("dont know how to authenticate using '" + method + "'")
     }
 }
 
 let connection = new autobahn.Connection({
+<<<<<<< HEAD
     url: "wss://chris.fireline.io/api",
     realm: 'fireline',
     authmethods: ['ticket'],
     authid: 'chris',
+=======
+    url: "wss://david.fireline.io/api",
+    realm: 'fireline',
+    authmethods: ['ticket'],
+    authid: 'david',
+>>>>>>> Added validate support for datatime
     onchallenge,
 })
 
@@ -51,6 +62,7 @@ connection.onopen = async (session) => {
         //console.log(await session.call('io.fireline.api.profile.get_name', []))
         //console.log(await session.call('io.fireline.api.profile.get_mail', []))
 
+<<<<<<< HEAD
         session.call('io.fireline.api.jurisdiction.create_zbereich', [], {
             name: 'Fahrmeister',
         }).then(
@@ -59,6 +71,18 @@ connection.onopen = async (session) => {
             },
             function (error) {
                 console.error("call", error)
+=======
+        session.call('io.fireline.api.activity.create_aktivitaet', [], {
+            von: '2013-12-11 10:09:08',
+            bis: '2013-12-11 12:09:08',
+            taetigkeit: 'Test 1'
+        }).then(
+            function (result) {
+                console.log("run", result)
+            },
+            function (error) {
+                console.error("run", error)
+>>>>>>> Added validate support for datatime
             }
         )
 

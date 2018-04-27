@@ -2,3 +2,4 @@
 node/config.js
 node/node_modules
 node/test.js
+node/fullchain.pem

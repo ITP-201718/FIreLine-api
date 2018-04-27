@@ -37,7 +37,7 @@ async function register (conf) {
 
         return true
     }
-    await helpers.s_register(conf.uri + '.create_aktivitaet', createAktivitaet())
+    await helpers.s_register(conf.uri + '.create_aktivitaet', createAktivitaet)
 
     /**
      * Updates an existing Activity
@@ -69,7 +69,7 @@ async function register (conf) {
         helpers.executeUpdate('aktivitaet', {id}, {von, bis, taetigkeit})
         return true
     }
-    await helpers.s_register(conf.uri + '.update_aktivitaet', updateAktivitaet())
+    await helpers.s_register(conf.uri + '.update_aktivitaet', updateAktivitaet)
 
     /**
      * Removes an existing Activity
@@ -90,7 +90,7 @@ async function register (conf) {
         await helpers.execute('DELETE FROM aktivitaet WHERE aid = :id', {id})
         return true
     }
-    await helpers.s_register(conf.uri + '.remove_Aktivitaet', removeAktivitaet())
+    await helpers.s_register(conf.uri + '.remove_Aktivitaet', removeAktivitaet)
 }
 
 module.exports = {register}

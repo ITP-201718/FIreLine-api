@@ -32,7 +32,7 @@ async function register (conf) {
 
         return true
     }
-    await helpers.s_register(conf.uri + '.create_berechtigung', createBerechtigung())
+    await helpers.s_register(conf.uri + '.create_berechtigung', createBerechtigung)
 
     /**
      * Updates an existing Permission
@@ -50,7 +50,7 @@ async function register (conf) {
                 presence: { message: '^You must choose a name' }
             },
             id: {
-                presence : { message: '^Internal Server Error' }
+                presence : { message: '^Internal Server Error' },
                 numericality: {onlyInteger: true}
             }
         }
@@ -59,7 +59,7 @@ async function register (conf) {
         helpers.executeUpdate('berechtigung', {id}, {uri,mame})
         return true
     }
-    await helpers.s_register(conf.uri + '.update_berechtigung', updateBerechtigung())
+    await helpers.s_register(conf.uri + '.update_berechtigung', updateBerechtigung)
 
     /**
      * Removes an existing Permission
@@ -71,7 +71,7 @@ async function register (conf) {
     async function removeBerechtigung(args, kwargs) {
         const constraints = {
             id: {
-                presence : { message: '^Internal Server Error' }
+                presence : { message: '^Internal Server Error' },
                 numericality: {onlyInteger: true}
             }
         }
@@ -81,7 +81,7 @@ async function register (conf) {
         await helpers.execute('DELETE FROM berechtigung WHERE bid = :id', {id})
         return true
     }
-    await helpers.s_register(conf.uri + '.remove_Berechtigung', removeBerechtigung())
+    await helpers.s_register(conf.uri + '.remove_Berechtigung', removeBerechtigung)
 }
 
 module.exports = {register}

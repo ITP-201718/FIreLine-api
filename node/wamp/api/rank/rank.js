@@ -32,7 +32,7 @@ async function register (conf) {
 
         return true
     }
-    await helpers.s_register(conf.uri + '.create_rank', createRank())
+    await helpers.s_register(conf.uri + '.create_rank', createRank)
 
     /**
      * Updates an existing Rank
@@ -50,7 +50,7 @@ async function register (conf) {
                 presence: { message: '^You must choose a short form ' }
             },
             id: {
-                presence: { message: 'Internal Server Error' }
+                presence: { message: 'Internal Server Error' },
                 numericality: {onlyInteger: true}
             }
         }
@@ -59,7 +59,7 @@ async function register (conf) {
         helpers.executeUpdate('rang', {id}, {name, kform})
         return true
     }
-    await helpers.s_register(conf.uri + '.update_rank', updateRank())
+    await helpers.s_register(conf.uri + '.update_rank', updateRank)
 
     /**
      * Removes an existing Rank
@@ -71,7 +71,7 @@ async function register (conf) {
     async function removeRank(args, kwargs){
         const constraints = {
             id: {
-                presence: { message: 'Internal Server Error' }
+                presence: { message: 'Internal Server Error' },
                 numericality: {onlyInteger: true}
             }
         }
@@ -80,7 +80,7 @@ async function register (conf) {
         helpers.execute('DELETE FROM rang WHERE rid = :id', {id})
         return true
     }
-    helpers.s_register(conf.uri + '.remove_Rank', removeRank())
+    helpers.s_register(conf.uri + '.remove_Rank', removeRank)
 }
 
 module.exports = {register}

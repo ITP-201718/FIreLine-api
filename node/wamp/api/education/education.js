@@ -28,7 +28,7 @@ async function register (conf){
 
         return true
     }
-    await helpers.s_register(conf.uri + '.create_ausbildung', createAusbildung())
+    await helpers.s_register(conf.uri + '.create_ausbildung', createAusbildung)
 
     /**
      * Updates an existing Education
@@ -52,7 +52,7 @@ async function register (conf){
         helpers.executeUpdate('ausbildung', {id},{name})
         return true
     }
-    await helpers.s_register(conf.uri + '.update_Ausbildung', updateAusbildung())
+    await helpers.s_register(conf.uri + '.update_Ausbildung', updateAusbildung)
 
     /**
      * Removes an existing Education
@@ -73,7 +73,7 @@ async function register (conf){
         await helpers.execute('DELETE FROM ausbildung WHERE auid = :id', {id})
         return true
     }
-    await helpers.s_register(conf.uri + '.remove_Ausbildung', removeAusbildung())
+    await helpers.s_register(conf.uri + '.remove_Ausbildung', removeAusbildung)
 }
 
 module.exports = {register}

@@ -1,4 +1,4 @@
-{
+  {
   "version": 2,
   "workers": [
     {
@@ -74,13 +74,13 @@
           "type": "web",
           "endpoint": {
             "type": "tcp",
-            "port": 8080
+            "port": 8080,
+            "tls": {
+              "key": "server_key.pem",
+              "certificate": "server_cert.pem"
+            }
           },
           "paths": {
-            "test": {
-              "type": "static",
-              "directory": "./test"
-            },
             "api": {
               "type": "websocket",
               "options": {

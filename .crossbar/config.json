@@ -74,7 +74,7 @@
           "type": "web",
           "endpoint": {
             "type": "tcp",
-            "port": 8080,
+            "port": 8085,
             "tls": {
               "key": "server_key.pem",
               "certificate": "server_cert.pem"
@@ -132,6 +132,22 @@
           }
         }
       ]
+    },
+    {
+      "type": "guest",
+      "executable": "node",
+      "arguments": [
+        "index.js"
+      ],
+      "options": {
+        "env": {
+          "inherit": false,
+          "vars": {
+            "NODE_EXTRA_CA_CERTS": "fullchain.pem"
+          }
+        },
+        "workdir": "../node"
+      }
     }
   ]
 }

@@ -28,7 +28,7 @@ async function register (conf) {
 
         return true
     }
-    await helpers.s_register(conf.uri + '.create_zbereich', createZbereich())
+    await helpers.s_register(conf.uri + '.create_zbereich', createZbereich)
 
     async function updateZbereich(args, kwargs) {
         const constraints = {
@@ -45,7 +45,7 @@ async function register (conf) {
         helpers.executeUpdate('zbereich', {id}, {name})
         return true
     }
-    await helpers.s_register(conf.uri + '.update_zbereich', updateZbereich())
+    await helpers.s_register(conf.uri + '.update_zbereich', updateZbereich)
 }
 
 module.exports = {register}

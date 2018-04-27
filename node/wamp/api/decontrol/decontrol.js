@@ -28,7 +28,7 @@ async function register (conf) {
 
         return true
     }
-    await helpers.s_register(conf.uri, '.create_freigabe', createFreigabe())
+    await helpers.s_register(conf.uri + '.create_freigabe', createFreigabe)
 
     async function updateFreigabe(args, kwargs) {
         const constraints = {
@@ -47,7 +47,7 @@ async function register (conf) {
         helpers.executeUpdate('freigabe', {id}, {name})
         return true
     }
-    await helpers.s_register(conf.uri + '.update_freigabe', updateFreigabe())
+    await helpers.s_register(conf.uri + '.update_freigabe', updateFreigabe)
 
 }
 

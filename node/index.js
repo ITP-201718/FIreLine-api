@@ -140,8 +140,9 @@ async function connect() {
         ]
     })
 
+
     // Wait for crossbar to start in docker-compose
-    await sleep(5000)
+    //await sleep(5000)
 
     await connectSql()
 

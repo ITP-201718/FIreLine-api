@@ -22,17 +22,17 @@ let onchallenge = (session, method, extra) => {
         //return autobahn.auth_cra.sign("f8K8A^5QkM@j}Dgmp\"rq'{R97y94f/8+", extra.challenge)
         return autobahn.auth_cra.sign("123sekret", extra.challenge)
     } else if (method === 'ticket') {
-        return "server"
+        return "chrisPass"
     } else {
         throw Error("dont know how to authenticate using '" + method + "'")
     }
 }
 
 let connection = new autobahn.Connection({
-    url: "wss://david.fireline.io:8080/server",
+    url: "wss://chris.fireline.io/api",
     realm: 'fireline',
     authmethods: ['ticket'],
-    authid: 'server',
+    authid: 'chris',
     onchallenge,
 })
 
@@ -51,19 +51,14 @@ connection.onopen = async (session) => {
         //console.log(await session.call('io.fireline.api.profile.get_name', []))
         //console.log(await session.call('io.fireline.api.profile.get_mail', []))
 
-        session.call('io.fireline.api.profile.create_user', [], {
-            username: 'david',
-            password: 'davidPass',
-            confirmPassword: 'davidPass',
-            first_name: 'David',
-            last_name: 'Langheiter',
-            mail: 'david@langheiter.com',
+        session.call('io.fireline.api.jurisdiction.create_zbereich', [], {
+            name: 'Fahrmeister',
         }).then(
             function (result) {
-                console.log("create_user", result)
+                console.log("call", result)
             },
             function (error) {
-                console.error("create_user", error)
+                console.error("call", error)
             }
         )
 

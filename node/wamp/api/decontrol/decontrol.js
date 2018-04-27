@@ -7,6 +7,7 @@ async function register (conf) {
 
     /**
      * Creates a new decontrol
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -30,6 +31,14 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.create_freigabe', createFreigabe)
 
+    /**
+     * Updates an existing decontrol
+     * Tested
+     * @param args
+     * @param kwargs
+     * @returns {Promise<boolean>}
+     */
+
     async function updateFreigabe(args, kwargs) {
         const constraints = {
             name: {
@@ -38,17 +47,39 @@ async function register (conf) {
                 }
             },
             id: {
-                message: { message: '^Internal Server Error' },
+                presence:  {message: '^Internal Server Error'},
                 numericality: {onlyInteger: true}
             }
         }
+
         await helpers.validate(kwargs, constraints)
         const {id, name} = kwargs
-        helpers.executeUpdate('freigabe', {id}, {name})
+        helpers.executeUpdate('freigabe', {fid: id}, {name})
         return true
     }
     await helpers.s_register(conf.uri + '.update_freigabe', updateFreigabe)
 
+    /**
+     * Removes an existing Education
+     * Tested
+     * @param args
+     * @param kwargs
+     * @returns {Promise<boolean>}
+     */
+
+    async function removeFreigabe(args, kwargs) {
+        const contraints = {
+            id: {
+                presence:  {message: '^Internal Server Error'},
+                numericality: {onlyInteger: true}
+            }
+        }
+        await helpers.validate(kwargs, contraints)
+        const {id} = kwargs
+        await helpers.execute('DELETE FROM freigabe WHERE fid = :id', {id})
+        return true
+    }
+    await helpers.s_register(conf.uri + '.remove_freigabe', removeFreigabe)
 }
 
 module.exports = {register}

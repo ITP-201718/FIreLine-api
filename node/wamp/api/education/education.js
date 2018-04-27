@@ -7,6 +7,7 @@ async function register (conf){
 
     /**
      * Creates a new Education
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -32,6 +33,7 @@ async function register (conf){
 
     /**
      * Updates an existing Education
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -49,13 +51,14 @@ async function register (conf){
         }
         await helpers.validate(kwargs, constraints)
         const {id, name} = kwargs
-        helpers.executeUpdate('ausbildung', {id},{name})
+        helpers.executeUpdate('ausbildung', {auid: id},{name})
         return true
     }
-    await helpers.s_register(conf.uri + '.update_Ausbildung', updateAusbildung)
+    await helpers.s_register(conf.uri + '.update_ausbildung', updateAusbildung)
 
     /**
      * Removes an existing Education
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -73,7 +76,7 @@ async function register (conf){
         await helpers.execute('DELETE FROM ausbildung WHERE auid = :id', {id})
         return true
     }
-    await helpers.s_register(conf.uri + '.remove_Ausbildung', removeAusbildung)
+    await helpers.s_register(conf.uri + '.remove_ausbildung', removeAusbildung)
 }
 
 module.exports = {register}

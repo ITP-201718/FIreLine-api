@@ -7,6 +7,7 @@ async function register (conf) {
 
     /**
      * Creates a new permission
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -36,6 +37,7 @@ async function register (conf) {
 
     /**
      * Updates an existing Permission
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -56,13 +58,14 @@ async function register (conf) {
         }
         await helpers.validate(kwargs, constraints)
         const {id,uri,name} = kwargs
-        helpers.executeUpdate('berechtigung', {id}, {uri,mame})
+        helpers.executeUpdate('berechtigung', {bid: id}, {uri,name})
         return true
     }
     await helpers.s_register(conf.uri + '.update_berechtigung', updateBerechtigung)
 
     /**
      * Removes an existing Permission
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<void>}
@@ -81,7 +84,7 @@ async function register (conf) {
         await helpers.execute('DELETE FROM berechtigung WHERE bid = :id', {id})
         return true
     }
-    await helpers.s_register(conf.uri + '.remove_Berechtigung', removeBerechtigung)
+    await helpers.s_register(conf.uri + '.remove_berechtigung', removeBerechtigung)
 }
 
 module.exports = {register}

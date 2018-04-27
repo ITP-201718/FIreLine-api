@@ -7,6 +7,7 @@ async function register (conf) {
 
     /**
      * Creates a new rank
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -36,6 +37,7 @@ async function register (conf) {
 
     /**
      * Updates an existing Rank
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -56,13 +58,14 @@ async function register (conf) {
         }
         await helpers.validate(kwargs, constraints)
         const {id,name,kform} = kwargs
-        helpers.executeUpdate('rang', {id}, {name, kform})
+        helpers.executeUpdate('rang', {rid: id}, {name, kform})
         return true
     }
     await helpers.s_register(conf.uri + '.update_rank', updateRank)
 
     /**
      * Removes an existing Rank
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -80,7 +83,7 @@ async function register (conf) {
         helpers.execute('DELETE FROM rang WHERE rid = :id', {id})
         return true
     }
-    helpers.s_register(conf.uri + '.remove_Rank', removeRank)
+    helpers.s_register(conf.uri + '.remove_rank', removeRank)
 }
 
 module.exports = {register}

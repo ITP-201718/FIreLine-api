@@ -83,12 +83,15 @@ async function loadModules(path, base_uri) {
             }
             return (a.stats.name < a.stats.name) ? -1 : (a.stats.name > b.stats.name) ? 1 : 0;
         })
-        for(let i in files) {
-            let next_uri = base_uri
-            if(files[i].stats.isDirectory()) {
-                next_uri += '.' + files[i].name
+        for(let file of files) {
+            if(file.name.startsWith("__")) {
+                continue
             }
-            await loadModules(files[i].path, next_uri)
+            let next_uri = base_uri
+            if(file.stats.isDirectory()) {
+                next_uri += '.' + file.name
+            }
+            await loadModules(file.path, next_uri)
         }
     } else {
         try {
@@ -139,10 +142,6 @@ async function connect() {
             })
         ]
     })
-
-
-    // Wait for crossbar to start in docker-compose
-    //await sleep(5000)
 
     await connectSql()
 

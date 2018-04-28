@@ -4,14 +4,16 @@ const validate = require('validate.js')
 
 const helpers = require('../../helpers')
 
-/**
- * Profile
- * @param {object} conf Populated by index.js
- */
-class Profile {
-    constructor(conf) {
-        this.conf = conf
-    }
+async function register (conf) {
+
+    await helpers.register_authid_mysql(conf.uri + '.get_vname',
+        'SELECT vname FROM user WHERE uname = :caller', 'vname')
+
+    await helpers.register_authid_mysql(conf.uri + '.get_nname',
+        'SELECT nname FROM user WHERE uname = :caller', 'nname')
+
+    await helpers.register_authid_mysql(conf.uri + '.get_mail',
+        'SELECT `mail` FROM `user` WHERE `uname` = :caller', 'mail')
 
     /**
      * Set mail of the current user
@@ -20,7 +22,7 @@ class Profile {
      * @param details
      * @returns {Promise<boolean>}
      */
-    static async setMail(args, kwargs, details) {
+    async function setMail(args, kwargs, details) {
         args = {
             uname: details.caller_authid,
             ...kwargs
@@ -44,6 +46,7 @@ class Profile {
 
         return true
     }
+    await helpers.s_register(conf.uri + '.set_mail', setMail)
 
     /**
      * Set firstname of the current user
@@ -52,7 +55,7 @@ class Profile {
      * @param details
      * @returns {Promise<boolean>}
      */
-    static async setVName(args, kwargs, details) {
+    async function setVName(args, kwargs, details) {
         args = {
             uname: details.caller_authid,
             ...kwargs
@@ -75,6 +78,7 @@ class Profile {
 
         return true
     }
+    await helpers.s_register(conf.uri + '.set_vname', setVName)
 
     /**
      * Set lastname of the current user
@@ -83,7 +87,7 @@ class Profile {
      * @param details
      * @returns {Promise<boolean>}
      */
-    static async setNName(args, kwargs, details) {
+    async function setNName(args, kwargs, details) {
         args = {
             uname: details.caller_authid,
             ...kwargs
@@ -106,6 +110,7 @@ class Profile {
 
         return true
     }
+    await helpers.s_register(conf.uri + '.set_nname', setNName)
 
     /**
      * Set the gender of the User
@@ -114,7 +119,7 @@ class Profile {
      * @param details
      * @returns {Promise<boolean>}
      */
-    static async setGeschlecht(args, kwargs, details) {
+    async function setGeschlecht(args, kwargs, details) {
 
         args = {
             uname: details.caller_authid,
@@ -133,14 +138,15 @@ class Profile {
         }
 
         await helpers.validate(args, constraints)
-
+        
         const {uname, gender} = args
         await helpers.executeUpdate(helpers.createJoinedTable('user', 'mitglied', 'uid'), {uname}, {geschlecht: gender})
-
+        
         return true
     }
+    helpers.s_register(conf.uri + '.set_gender', setGeschlecht)
 
-    static async setGebDat(args, kwargs, details) {
+    async function setGebDat(args, kwargs, details) {
         args = {
             uname: details.caller_authid,
             ...kwargs
@@ -164,8 +170,9 @@ class Profile {
 
         return true
     }
+    await helpers.s_register(conf.uri + '.set_gebdat', setGebDat)
 
-    static async setZugehoerigkeit(args, kwargs, details) {
+    async function setZugehoerigkeit(args, kwargs, details) {
         args = {
             uname: details.caller_authid,
             ...kwargs
@@ -173,10 +180,10 @@ class Profile {
 
         const constraints = {
             zugehoerigkeit: {
-                presence: {message: '^You must choose a membership'}
+                presence: { message: '^You must choose a membership' }
             },
             uname: {
-                inDB: {table: 'user', message: '^Username does not exists'},
+                inDB: {table: 'user', message: '^Username does not exists' },
                 presence: true,
             }
         }
@@ -188,6 +195,7 @@ class Profile {
 
         return true
     }
+    await helpers.s_register(conf.uri + '.set_Zugehoerigkeit', setZugehoerigkeit)
 
     /**
      * Creates a new usery
@@ -205,15 +213,15 @@ class Profile {
      * @param {String} kwargs.zugehoerigkeit User's affiliation
      * @returns {Promise<boolean>} True for Autobahn
      */
-    static async createUser(args, kwargs) {
+    async function createUser(args, kwargs) {
         const constraints = {
             username: {
-                presence: {message: '^You must pick a username'},
-                notInDB: {table: 'user', row: 'uname'}
+                presence: { message: '^You must pick a username' },
+                notInDB: { table: 'user', row: 'uname' }
             },
             password: {
-                presence: {message: '^You must set a password'},
-                length: {minimum: 8, row: 'pwd'}
+                presence: { message: '^You must set a password' },
+                length: { minimum: 8, row: 'pwd' }
             },
             confirm_password: {
                 equality: {
@@ -222,28 +230,28 @@ class Profile {
                 }
             },
             first_name: {
-                presence: {message: '^You must pick a first name'}
+                presence: { message: '^You must pick a first name' }
             },
             last_name: {
-                presence: {message: '^You must pick a first name'}
+                presence: { message: '^You must pick a first name' }
             },
             mail: {
                 email: true,
-                notInDB: {table: 'user', message: '^Email does already exist'}
+                notInDB: { table: 'user', message: '^Email does already exist'}
             },
             geschlecht: {
-                presence: {message: '^You must pick a gender'},
+                presence: { message: '^You must pick a gender' },
                 inclusion: {
-                    within: ['m', 'w', 'o'],
+                    within: ['m','w','o'],
                     message: '^You must pick a valid gender'
                 }
             },
             gebdat: {
-                presence: {message: '^You must pick a birth date'},
+                presence: { message: '^You must pick a birth date' },
                 date: true,
             },
             zugehoerigkeit: {
-                presence: {message: '^You must pick a membership'}
+                presence: { message: '^You must pick a membership' }
             }
         }
 
@@ -274,35 +282,7 @@ class Profile {
 
         return true
     }
-
-    /**
-     * Registers methods to Autobahn
-     * @returns {Promise<void>}
-     */
-    async register() {
-        await helpers.register_authid_mysql(conf.uri + '.get_vname',
-            'SELECT vname FROM user WHERE uname = :caller', 'vname')
-
-        await helpers.register_authid_mysql(conf.uri + '.get_nname',
-            'SELECT nname FROM user WHERE uname = :caller', 'nname')
-
-        await helpers.register_authid_mysql(conf.uri + '.get_mail',
-            'SELECT `mail` FROM `user` WHERE `uname` = :caller', 'mail')
-
-        await helpers.s_register(conf.uri + '.set_mail', Profile.setMail)
-        await helpers.s_register(conf.uri + '.set_vname', Profile.setVName)
-        await helpers.s_register(conf.uri + '.set_nname', Profile.setNName)
-        await helpers.s_register(conf.uri + '.set_gender', Profile.setGeschlecht)
-        await helpers.s_register(conf.uri + '.set_gebdat', Profile.setGebDat)
-        await helpers.s_register(conf.uri + '.set_Zugehoerigkeit', Profile.setZugehoerigkeit)
-        await helpers.s_register(conf.uri + '.create_user', Profile.createUser)
-    }
-
-}
-
-async function register (conf) {
-    let profile = new Profile(conf)
-    await profile.register()
+    await helpers.s_register(conf.uri + '.create_user', createUser)
 }
 
 module.exports = {register}

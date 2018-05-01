@@ -1,7 +1,6 @@
 const passwordHash = require('password-hash');
 const autobahn = require('autobahn')
-const helpers = require('../helpers')
-
+const helpers = require('../helpers').helpers
 async function register(conf) {
 
     async function authenticate(args) {

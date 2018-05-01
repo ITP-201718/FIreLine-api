@@ -155,7 +155,7 @@ async function connect() {
 
     // Emergency add user
     /*setTimeout(() => {
-        session.call('io.fireline.api.profile.create_user', [], {
+        session.call('io.fireline.api.user.create_user', [], {
             username: 'david',
             password: 'davidPass',
             first_name: 'David',

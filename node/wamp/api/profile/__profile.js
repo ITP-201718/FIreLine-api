@@ -2,8 +2,7 @@ const autobahn = require('autobahn')
 const passwordHash = require('password-hash')
 const validate = require('validate.js')
 
-const helpers = require('../../helpers')
-
+const helpers = require('../../helpers').helpers
 async function register (conf) {
 
     await helpers.register_authid_mysql(conf.uri + '.get_vname',

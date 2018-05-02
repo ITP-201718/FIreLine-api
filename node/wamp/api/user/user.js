@@ -2,7 +2,7 @@ const passwordHash = require('password-hash')
 const validate = require('validate.js')
 const Component = require('../../../Component')
 
-const helpers = require('../../helpers').helpers
+const helpers = require('../../helpers')
 /**
  * User
  */

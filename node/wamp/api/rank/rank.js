@@ -1,7 +1,7 @@
 const autbahn = require('autobahn')
 const validate = require('validate.js')
 
-const helpers = require('../../helpers').helpers
+const helpers = require('../../helpers')
 async function register (conf) {
 
     /**

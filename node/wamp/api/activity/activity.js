@@ -7,6 +7,7 @@ async function register (conf) {
 
     /**
      * Creates a new activity
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -25,7 +26,6 @@ async function register (conf) {
                 presence: { message: '^You must choose a activity'}
             }
         }
-
         await helpers.validate(kwargs, constraints)
 
         let aktivitaetInsert = {
@@ -42,6 +42,7 @@ async function register (conf) {
 
     /**
      * Updates an existing Activity
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -67,13 +68,14 @@ async function register (conf) {
         }
         await helpers.validate(kwargs, constraints)
         const {id, von, bis, taetigkeit} = kwargs
-        helpers.executeUpdate('aktivitaet', {id}, {von, bis, taetigkeit})
+        helpers.executeUpdate('aktivitaet', {aid: id}, {von, bis, taetigkeit})
         return true
     }
     await helpers.s_register(conf.uri + '.update_aktivitaet', updateAktivitaet)
 
     /**
      * Removes an existing Activity
+     * Tested
      * @param args
      * @param kwargs
      * @returns {Promise<boolean>}
@@ -91,7 +93,7 @@ async function register (conf) {
         await helpers.execute('DELETE FROM aktivitaet WHERE aid = :id', {id})
         return true
     }
-    await helpers.s_register(conf.uri + '.remove_Aktivitaet', removeAktivitaet)
+    await helpers.s_register(conf.uri + '.remove_aktivitaet', removeAktivitaet)
 }
 
 module.exports = {register}

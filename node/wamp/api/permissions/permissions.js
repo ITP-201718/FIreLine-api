@@ -4,6 +4,15 @@ const validate = require('validate.js')
 const helpers = require('../../helpers')
 
 async function register (conf){
+
+    /**
+     * Adds a Permission to a user
+     * Tested
+     * @param args
+     * @param kwargs
+     * @returns {Promise<boolean>}
+     */
+
     async function addPermissionToUser(args, kwargs){
         const constraints = {
             bid: {
@@ -15,8 +24,8 @@ async function register (conf){
                 numericality: { onlyInteger: true }
             },
             hat: {
-                presence: { message: '^You must choose if the user has this permission' }
-                inclusion: { isBoolean: true }
+                presence: { message: '^You must choose if the user has this permission' },
+                inclusion: [true, false, "true", "false"],
             }
         }
         await helpers.validate(kwargs, constraints)
@@ -32,6 +41,13 @@ async function register (conf){
     }
     await helpers.s_register(conf.uri + '.create_berechtigungen', addPermissionToUser)
 
+    /**
+     * Removes a Permission from a user
+     * Tested
+     * @param args
+     * @param kwargs
+     * @returns {Promise<boolean>}
+     */
     async function removePermissionFromUser(args, kwargs) {
         const constraints = {
             bid: {

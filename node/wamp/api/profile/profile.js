@@ -170,7 +170,7 @@ async function register (conf) {
 
         return true
     }
-    await helpers.s_register(conf.uri + '.set_gebdat', setGebDat())
+    await helpers.s_register(conf.uri + '.set_gebdat', setGebDat)
 
     async function setZugehoerigkeit(args, kwargs, details) {
         args = {
@@ -195,7 +195,7 @@ async function register (conf) {
 
         return true
     }
-    await helpers.s_register(conf.uri + '.set_Zugehoerigkeit', setZugehoerigkeit())
+    await helpers.s_register(conf.uri + '.set_Zugehoerigkeit', setZugehoerigkeit)
 
     /**
      * Creates a new user

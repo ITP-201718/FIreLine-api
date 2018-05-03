@@ -51,11 +51,11 @@ async function register (conf){
     async function removePermissionFromUser(args, kwargs) {
         const constraints = {
             bid: {
-                presence: { message: '^Internal Server Error (2004)' },
+                presence: { message: '^Internal Server Error (2006)' },
                 numericality: { onlyInteger: true }
             },
             mid: {
-                presence: { message: '^Internal Server Error (2005)' },
+                presence: { message: '^Internal Server Error (2007)' },
                 numericality: { onlyInteger: true }
             }
         }

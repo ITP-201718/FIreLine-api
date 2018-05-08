@@ -41,8 +41,7 @@ async function register (conf) {
      * @param kwargs
      * @returns {Promise<boolean>}
      */
-
-    async function updateRank(args, kwargs) {
+    /*async function updateRank(args, kwargs) {
         const constraints = {
             name: {
                 presence: { message: '^You must choose a name' }
@@ -60,7 +59,7 @@ async function register (conf) {
         helpers.executeUpdate('rang', {rid: id}, {name, kform})
         return true
     }
-    await helpers.s_register(conf.uri + '.update_rank', updateRank)
+    await helpers.s_register(conf.uri + '.update_rank', updateRank)*/
 
     /**
      * Removes an existing Rank
@@ -82,7 +81,30 @@ async function register (conf) {
         helpers.execute('DELETE FROM rang WHERE rid = :id', {id})
         return true
     }
-    helpers.s_register(conf.uri + '.remove_rank', removeRank)
+    helpers.s_register(conf.uri + '.remove', removeRank)
+
+    const baseCfg = {
+        table: 'rang',
+        elements: [
+            {name: 'id', column: 'rid'},
+            {name: 'name', column: 'name'},
+            {name: 'kname', column: 'kform'}
+        ],
+    }
+
+    /**
+     * Generates get
+     */
+    await helpers.generateGet({
+        ...baseCfg,
+        uri: conf.uri + '.get',
+    })
+
+    await helpers.generateUpdate({
+        ...baseCfg,
+        uri: conf.uri + '.update',
+        constraint: {},
+    })
 }
 
 module.exports = {register}

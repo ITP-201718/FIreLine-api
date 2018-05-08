@@ -6,10 +6,15 @@ let conf = null
 
 async function register(_conf) {
     conf = _conf
-    const { register_validators } = require('./validators')
+    const {register_validators} = require('./validators')
     register_validators()
 }
 
+/**
+ * Try catch wrapper for sql.execute. Throws 501
+ * @throws {Error} 501
+ * @returns {Promise<object>} Sql answer
+ */
 async function execute() {
     try {
         return await conf.sql_connection.execute(...arguments)
@@ -20,34 +25,41 @@ async function execute() {
     }
 }
 
+/**
+ * Registers simple select function for auth id usages
+ * @param uri Uri of the function
+ * @param statement Select statement (:caller is replaced by the caller)
+ * @param results Which results matter of the select
+ * @returns {Promise<void>}
+ */
 async function register_authid_mysql(uri, statement, results) {
-    if(typeof uri !== 'string') {
-        throw "Uri needs to be a string"
+    if (typeof uri !== 'string') {
+        throw 'Uri needs to be a string'
     }
-    if(typeof statement !== 'string') {
-        throw "statement needs to be a string"
+    if (typeof statement !== 'string') {
+        throw 'statement needs to be a string'
     }
-    if(!(typeof results === 'string' || Array.isArray(results))) {
-        throw "results needs to a string or an array"
+    if (!(typeof results === 'string' || Array.isArray(results))) {
+        throw 'results needs to a string or an array'
     }
 
     async function callback(args, kwargs, details) {
         let caller = details.caller_authid
 
-        if(caller === undefined) {
+        if (caller === undefined) {
             throw new autobahn.Error('io.fireline.error.no_caller_authid',
                 ['Got not caller authid', 'This is a WAMP router misconfiguration'])
         }
 
         let [rows] = await execute(statement, {caller: caller})
 
-        if(rows.length !== 1) {
+        if (rows.length !== 1) {
             throw autobahn.Error('io.fireline.error.no_such_user', ['No such user'])
         }
 
-        if(Array.isArray(results)) {
+        if (Array.isArray(results)) {
             let ret = {}
-            for(let i in results) {
+            for (let i in results) {
                 ret[results[i]] = row[0][results[i]]
             }
             return ret
@@ -59,27 +71,41 @@ async function register_authid_mysql(uri, statement, results) {
     await s_register(uri, callback)
 }
 
+/**
+ * Checks if data is already in given table/column
+ * @param table Table to search in
+ * @param column Column to search in
+ * @param value Value to search for
+ * @returns {Promise<boolean>} If it is in the table/column or not
+ */
 async function alreadySetSql(table, column, value) {
     let [res] = await conf.sql_connection.execute(`SELECT ${column} FROM ${table} WHERE ${column} = ?`, [value])
     return res.length !== 0
 }
 
+/**
+ * Registers an WAMP method with logging output (And it is always good to do it centralized)
+ * @param uri Uri to register method to
+ * @param func Callback function
+ * @returns {Promise<void>}
+ */
 async function s_register(uri, func) {
     await conf.ab_session.register(uri, func)
-    console.log("Successfully Registered: '" + uri + "'")
+    console.log('Successfully Registered: \'' + uri + '\'')
 }
 
 /**
  * Generates Sql Data set ( (column, column2, ...)
- * @param values
- * @returns {string|string}
+ * @param {array} values To be in the data set. (Ordered)
+ * @param {boolean} withParenthesis If the generated set should be with parenthesis
+ * @returns {string} Sql data set
  */
-function generateSqlDataSet(values) {
-    let ret = '('
-    for(let i of values) {
-        ret += "`" + i + "`, "
+function generateSqlDataSet(values, withParenthesis = true) {
+    let ret = (withParenthesis ? '(' : '')
+    for (let i of values) {
+        ret += '`' + i + '`, '
     }
-    ret = ret.slice(0, -2) + ')'
+    ret = ret.slice(0, -2) + (withParenthesis ? ')' : '')
     return ret
 }
 
@@ -87,11 +113,11 @@ function generateSqlDataValueSet(values) {
     let keys = Object.keys(values)
     let dataSet = generateSqlDataSet(keys)
     let valueSet = '('
-    for(let i of keys) {
+    for (let i of keys) {
         let val = values[i]
         let value = ':' + i + ', '
-        if(validatejs.isObject(val)) {
-            if(!!val.raw) {
+        if (validatejs.isObject(val)) {
+            if (!!val.raw) {
                 value = val.value + ', '
             } else {
                 value = ':' + val.value + ', '
@@ -100,7 +126,7 @@ function generateSqlDataValueSet(values) {
         }
         valueSet += value
     }
-    valueSet = valueSet.slice(0, -2) +')'
+    valueSet = valueSet.slice(0, -2) + ')'
     return {
         dataSet,
         valueSet,
@@ -109,14 +135,23 @@ function generateSqlDataValueSet(values) {
 }
 
 function generateUpdateDataValueSet(table, values, check) {
-    let sql = "UPDATE " + table + " SET "
+    let sql = 'UPDATE ' + table + ' SET '
     check = generateCheckSet(check)
 }
 
 function generateSetSet(values) {
-    let sql = "SET "
+    let sql = 'SET '
     let setValues = {}
-    for(let i in values) {
+    for (let i in values) {
+        const val = values[i]
+        if (validatejs.isObject(val)) {
+            if (!!val.raw) {
+                sql += i + ' = ' + val.value + ', '
+                continue
+            } else {
+                values[i] = val.value
+            }
+        }
         sql += i + ' = :set_' + i + ', '
         setValues['set_' + i] = values[i]
     }
@@ -125,10 +160,10 @@ function generateSetSet(values) {
 }
 
 function generateCheckSet(check) {
-    let sql = "WHERE "
+    let sql = 'WHERE '
     let checkValues = {}
-    for(let i in check) {
-        sql += i + ' = :check_' + i + " AND ";
+    for (let i in check) {
+        sql += i + ' = :check_' + i + ' AND ';
         checkValues['check_' + i] = check[i]
     }
     sql = sql.slice(0, -5)
@@ -136,10 +171,10 @@ function generateCheckSet(check) {
 }
 
 function generateUpdateSet(table, check, values) {
-    let sql = "UPDATE " + table + " "
+    let sql = 'UPDATE ' + table + ' '
     let setSet = generateSetSet(values)
     let checkSet = generateCheckSet(check)
-    sql += setSet.sql + " " + checkSet.sql
+    sql += setSet.sql + ' ' + checkSet.sql
     return {sql, values: {...setSet.setValues, ...checkSet.checkValues}}
 }
 
@@ -171,7 +206,7 @@ async function executeInsert(table, values) {
     let insert = generateInsert(table, values)
     try {
         await conf.sql_connection.execute(insert.sql, insert.values)
-    } catch(err) {
+    } catch (err) {
         console.error('executeInsert', err)
         throw 'Internal Error (1004)'
     }
@@ -181,9 +216,9 @@ async function validate(attributes, constraints, options) {
     try {
         await validatejs.async(attributes, constraints, options)
     } catch (err) {
-        if(err instanceof Error) {
+        if (err instanceof Error) {
             console.error('Validation Error', err)
-            throw "Internal Error (1005)"
+            throw 'Internal Error (1005)'
         } else {
             conf.logger.log('verbose', 'Validation error')
             throw new autobahn.Error('io.fireline.error.validate', [err])
@@ -191,6 +226,192 @@ async function validate(attributes, constraints, options) {
     }
 }
 
+/**
+ * Generates Get
+ * @param {object} options Options
+ * @param {String} options.uri Uri to register it to
+ * @param {String} options.table Table to get data from
+ * @param {array} options.elements Array of objects. Object: {name: 'name', column: 'column'}
+ * @returns {Promise<void>}
+ */
+async function generateGet(options) {
+
+    let columns = []
+    let names = []
+    for (let element of options.elements) {
+        columns.push(element.column)
+        names.push(element.name)
+    }
+
+    const baseSelect = 'SELECT ' + generateSqlDataSet(columns, false) + ' FROM ' + options.table
+
+    let constraints = {
+        order: {
+            inclusion: {within: ['asc', 'desc']},
+        },
+        order_by: {
+            inclusion: {within: names}
+        },
+        limit: {
+            numericality: {
+                onlyInteger: true,
+                greaterThanOrEqual: -1,
+                lessThanOrEqual: 100,
+            },
+        },
+        limit_offset: {
+            numericality: {
+                onlyInteger: true,
+                greaterThan: -1,
+            },
+        },
+        id: {
+            numericality: {
+                onlyInteger: true,
+                greaterThan: -1,
+            },
+        }
+    }
+
+    /**
+     * Standard get function generated by generateGet
+     * @param {Array} args Populated by Autobahn
+     * @param {Object} kwargs Populated by Autobahn
+     * @param {String} kwargs.order In witch order to get it [asc, desc]. Default: asc. Only in combination with order_by
+     * @param {String} kwargs.order_by By what data to order by
+     * @param {String} kwargs.limit How many datasets to return. Default 10. Min 1. Max 100
+     * @param {String} kwargs.limit_offset From where to get datasets. Default 0. Min 0.
+     * @param (number} kwargs.id Id to get data for. When used kwargs.limit_offset is set to 0
+     * @returns {Promise<Array>}
+     */
+    async function get(args, kwargs) {
+        await validate(kwargs, constraints)
+
+        let select = baseSelect;
+        if (kwargs.id) {
+            select += ' WHERE ' + columns[names.indexOf('id')] + ' = :id'
+            kwargs.limit_offset = 0
+        }
+        if ('order_by' in kwargs) {
+            kwargs.order_by = columns[names.indexOf(kwargs.order_by)]
+            kwargs.order = kwargs.order ? kwargs.order : 'asc'
+            select += ' ORDER BY ' + kwargs.order_by + ' ' + kwargs.order
+        }
+        kwargs.limit = kwargs.limit ? kwargs.limit : 10
+        if (kwargs.limit > -1) {
+            kwargs.limit_offset = kwargs.limit_offset ? kwargs.limit_offset : 0
+            select += ' LIMIT :limit OFFSET :limit_offset'
+        }
+
+        let [result] = await execute(select, kwargs)
+        let data = []
+
+        for (let res of result) {
+            let obj = {}
+            for (let col in columns) {
+                obj[names[col]] = res[columns[col]]
+            }
+            data.push(obj)
+        }
+
+        return {data}
+    }
+
+    await s_register(options.uri, get)
+}
+
+function convertKeys(object, from, to) {
+    let newObj = {}
+    for(let i in object) {
+        const index = from.indexOf(i)
+        if(index !== -1) {
+            newObj[to[index]] = object[i]
+        } else {
+            newObj[i] = object[i]
+        }
+    }
+
+    return newObj
+}
+
+/**
+ * Generates Update
+ * @param {object} options Options
+ * @param {String} options.uri Uri to register update to
+ * @param {String} options.table Table to get data from
+ * @param {array} options.elements Array of objects. Objects: {name: 'name', column: 'column'}
+ * @param {object} options.constraint Constraint to check arguments against
+ * @returns {Promise<void>}
+ */
+async function generateUpdate(options) {
+
+    let columns = []
+    let names = []
+    for (let element of options.elements) {
+        columns.push(element.column)
+        names.push(element.name)
+    }
+
+    const baseSelect = 'SELECT ' + generateSqlDataSet(columns, false) + ' FROM ' + options.table
+
+    const constraints = {
+        id: {
+            presence: true,
+            numericality: {
+                onlyInteger: true,
+                greaterThan: -1,
+            },
+            inDB: {
+                table: options.table,
+                row: columns[names.indexOf('id')],
+            }
+        },
+        values: {
+            presence: true
+        }
+    }
+
+    /**
+     * Standard update function generated by generateUpdate
+     * @param {Array} args Populated by Autobahn
+     * @param {Object} kwargs Populated by Autobahn
+     * @param {number} kwargs.id Id to update
+     * @param {object} kwargs.values Values to update
+     * @returns {Promise<void>}
+     */
+    async function update(args, kwargs) {
+        await validate(kwargs, constraints)
+        await validate(kwargs.values, options.constraint)
+
+        const {id, values} = kwargs
+
+        let updateData = {}
+        for (let i in values) {
+            let index = names.indexOf(i)
+            if (index === -1) {
+                console.log(options.uri, i + ' was not found in names')
+                throw new autobahn.Error('io.fireline.error.error', ['Internal server error 1081'])
+            }
+            updateData[columns[index]] = values[i]
+        }
+
+        updateData[columns[names.indexOf('id')]] = {
+            raw: true,
+            value: 'LAST_INSERT_ID(' + columns[names.indexOf('id')] + ')'
+        }
+
+        await executeUpdate(options.table, {[columns[names.indexOf('id')]]: id}, updateData)
+        const row = (await execute(baseSelect + ' WHERE ' + columns[names.indexOf('id')] + ' = LAST_INSERT_ID() LIMIT 1'))[0][0]
+        await conf.ab_session.publish(options.uri, [], {data: convertKeys(row, columns, names)})
+    }
+
+    await s_register(options.uri, update)
+}
+
+/**
+ *
+ * @type {{register: register, register_authid_mysql: register_authid_mysql, s_register: s_register, alreadySetSql: function(*, *, *): boolean, execute: execute, generateSqlDataValueSet: function(*=): {dataSet: string, valueSet: string|string, values: *}, generateSqlDataSet: function(*): (string|string), generateCheckSet: function(*): {sql: string, checkValues}, generateSetSet: function(*): {sql: string, setValues}, generateInsert: function(*, *=): {sql: string, values: *}, createJoinedTable: function(*, *, *): string, executeUpdate: executeUpdate, executeInsert: executeInsert, validate: validate}}
+ */
 module.exports = {
     register,
     register_authid_mysql,
@@ -206,4 +427,6 @@ module.exports = {
     executeUpdate,
     executeInsert,
     validate,
+    generateGet,
+    generateUpdate,
 }

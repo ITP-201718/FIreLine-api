@@ -49,7 +49,7 @@ async function register (conf) {
      * @returns {Promise<boolean>}
      */
 
-    async function updateEinsatz(awgs, kwargs) {
+    /*async function updateEinsatz(awgs, kwargs) {
         const constraints = {
             ort: {
                 presence: { message: '^You must choose a location' }
@@ -73,7 +73,7 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.update_einsatz', updateEinsatz)
-
+    */
     /**
      * Removes an existing mission
      * Tested
@@ -95,6 +95,32 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.remove_einsatz', removeEinsatz)
+
+    const baseCfg = {
+        table: 'einsatz',
+        elements: [
+            {name: 'id', column: 'eid'},
+            {name: 'ort', column: 'ort'},
+            {name: 'von', column: 'von'},
+            {name: 'bis', column: 'bis'},
+            {name: 'stufe', column: 'estufe'},
+            {name: 'beschreibung', column: 'beschreibung'}
+        ],
+    }
+
+    /**
+     * Generates get
+     */
+    await helpers.generateGet({
+        ...baseCfg,
+        uri: conf.uri + '.get',
+    })
+
+    await helpers.generateUpdate({
+        ...baseCfg,
+        uri: conf.uri + '.update',
+        constraint: {},
+    })
 }
 
 module.exports = {register}

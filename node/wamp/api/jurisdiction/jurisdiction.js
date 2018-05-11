@@ -29,7 +29,7 @@ async function register (conf) {
     }
     await helpers.s_register(conf.uri + '.create_zbereich', createZbereich)
 
-    async function updateZbereich(args, kwargs) {
+    /*async function updateZbereich(args, kwargs) {
         const constraints = {
             name: {
                 presence: { message: '^You must choose a name' }
@@ -45,6 +45,29 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.update_zbereich', updateZbereich)
+    */
+
+    const baseCfg = {
+        table: 'zbereich',
+        elements: [
+            {name: 'id', column: 'zid'},
+            {name: 'name', column: 'name'}
+        ],
+    }
+
+    /**
+     * Generates get
+     */
+    await helpers.generateGet({
+        ...baseCfg,
+        uri: conf.uri + '.get',
+    })
+
+    await helpers.generateUpdate({
+        ...baseCfg,
+        uri: conf.uri + '.update',
+        constraint: {},
+    })
 }
 
 module.exports = {register}

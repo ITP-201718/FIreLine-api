@@ -39,7 +39,7 @@ async function register (conf) {
      * @returns {Promise<boolean>}
      */
 
-    async function updateGeraetegrp(args, kwargs){
+    /*async function updateGeraetegrp(args, kwargs){
         const constraints = {
             name: {
                 presence: { message: '^You must choose a name' }
@@ -55,7 +55,7 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.update_geraetegrp', updateGeraetegrp)
-
+    */
     /**
      * Removes an existing device group
      * Tested
@@ -77,6 +77,28 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.remove_geraetegrp', removeGeraetegrp)
+
+    const baseCfg = {
+        table: 'geraetegrp',
+        elements: [
+            {name: 'id', column: 'ggid'},
+            {name: 'name', column: 'name'}
+        ],
+    }
+
+    /**
+     * Generates get
+     */
+    await helpers.generateGet({
+        ...baseCfg,
+        uri: conf.uri + '.get',
+    })
+
+    await helpers.generateUpdate({
+        ...baseCfg,
+        uri: conf.uri + '.update',
+        constraint: {},
+    })
 }
 
 module.exports = {register}

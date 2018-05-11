@@ -38,7 +38,7 @@ async function register (conf) {
      * @returns {Promise<boolean>}
      */
 
-    async function updateFreigabe(args, kwargs) {
+    /*async function updateFreigabe(args, kwargs) {
         const constraints = {
             name: {
                 presence: {
@@ -57,7 +57,7 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.update_freigabe', updateFreigabe)
-
+    */
     /**
      * Removes an existing Education
      * Tested
@@ -79,6 +79,28 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.remove_freigabe', removeFreigabe)
+
+    const baseCfg = {
+        table: 'freigabe',
+        elements: [
+            {name: 'id', column: 'fid'},
+            {name: 'name', column: 'name'}
+        ],
+    }
+
+    /**
+     * Generates get
+     */
+    helpers.generateGet({
+        ...baseCfg,
+        uri: conf.uri + '.get',
+    })
+
+    await helpers.generateUpdate({
+        ...baseCfg,
+        uri: conf.uri + '.update',
+        constraint: {},
+    })
 }
 
 module.exports = {register}

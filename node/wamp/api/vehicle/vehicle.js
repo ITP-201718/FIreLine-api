@@ -43,7 +43,7 @@ async function register (conf) {
             fmenge: {
                 presence: { message: '^You must choose how many vehicles are in stock' },
                 numericality: { onlyInteger: true }
-            }
+            },
         }
         await helpers.validate(kwargs, constraints)
 
@@ -71,7 +71,7 @@ async function register (conf) {
      * @param kwargs
      * @returns {Promise<boolean>}
      */
-
+    /*
     async function updateFahrzeug(args, kwargs) {
         const constraints = {
             einsatzbereit: {
@@ -114,7 +114,7 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.update_fahrzeug', updateFahrzeug)
-
+    */
     /**
      * Removes an existing vehicle
      * Tested
@@ -136,6 +136,35 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.remove_fahrzeug', removeFahrzeug)
+
+    const baseCfg = {
+        table: 'fahrzeug',
+        elements: [
+            {name: 'id', column: 'fid'},
+            {name: 'einsatzbereit', column: 'einsatzbereit'},
+            {name: 'rufname', column: 'rufname'},
+            {name: 'mannstaerke', column: 'mannstaerke'},
+            {name: 'ps', column: 'ps'},
+            {name: 'bez', column: 'bez'},
+            {name: 'automatik', column: 'automatik'},
+            {name: 'kennz', column: 'kennz'},
+            {name: 'fmenge', column: 'fmenge'}
+        ],
+    }
+
+    /**
+     * Generates get
+     */
+    await helpers.generateGet({
+        ...baseCfg,
+        uri: conf.uri + '.get',
+    })
+
+    await helpers.generateUpdate({
+        ...baseCfg,
+        uri: conf.uri + '.update',
+        constraint: {},
+    })
 }
 
 module.exports = {register}

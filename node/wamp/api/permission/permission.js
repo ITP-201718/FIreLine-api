@@ -42,7 +42,7 @@ async function register (conf) {
      * @returns {Promise<boolean>}
      */
 
-    async function updateBerechtigung(args, kwargs){
+    /*async function updateBerechtigung(args, kwargs){
         const constraints = {
             uri: {
                 presence: { message: '^You must choose a uri' }
@@ -61,7 +61,7 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.update_berechtigung', updateBerechtigung)
-
+    */
     /**
      * Removes an existing Permission
      * Tested
@@ -84,6 +84,29 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.remove_berechtigung', removeBerechtigung)
+
+    const baseCfg = {
+        table: 'rang',
+        elements: [
+            {name: 'id', column: 'bid'},
+            {name: 'name', column: 'name'},
+            {name: 'uri', column: 'uri'}
+        ],
+    }
+
+    /**
+     * Generates get
+     */
+    await helpers.generateGet({
+        ...baseCfg,
+        uri: conf.uri + '.get',
+    })
+
+    await helpers.generateUpdate({
+        ...baseCfg,
+        uri: conf.uri + '.update',
+        constraint: {},
+    })
 }
 
 module.exports = {register}

@@ -47,7 +47,7 @@ async function register (conf) {
      * @returns {Promise<boolean>}
      */
 
-    async function updateAktivitaet(args, kwargs){
+    /*async function updateAktivitaet(args, kwargs){
         const constraints = {
             von: {
                 presence: { message: '^You must choose a from date' },
@@ -71,7 +71,7 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.update_aktivitaet', updateAktivitaet)
-
+    */
     /**
      * Removes an existing Activity
      * Tested
@@ -93,6 +93,31 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.remove_aktivitaet', removeAktivitaet)
+
+    const baseCfg = {
+        table: 'aktivitaet',
+        elements: [
+            {name: 'id', column: 'aid'},
+            {name: 'von', column: 'von'},
+            {name: 'bis', column: 'bis'},
+            {name: 'taetigkeit', column: 'taetigkeit'}
+        ],
+    }
+
+    /**
+     * Generates get
+     */
+    await helpers.generateGet({
+        ...baseCfg,
+        uri: conf.uri + '.get',
+    })
+
+    await helpers.generateUpdate({
+        ...baseCfg,
+        uri: conf.uri + '.update',
+        constraint: {},
+    })
+
 }
 
 module.exports = {register}

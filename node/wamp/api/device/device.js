@@ -53,7 +53,7 @@ async function register (conf) {
      * @returns {Promise<boolean>}
      */
 
-    async function updateGeraet(args, kwargs){
+    /*async function updateGeraet(args, kwargs){
         const constraints = {
             name: {
                 presence: {message: '^You must choose a name'}
@@ -80,7 +80,7 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.update_geraet', updateGeraet)
-
+    */
     /**
      * Removes an existing device
      * Tested
@@ -102,6 +102,31 @@ async function register (conf) {
         return true
     }
     await helpers.s_register(conf.uri + '.remove_geraet', removeGeraet)
+
+    const baseCfg = {
+        table: 'geraet',
+        elements: [
+            {name: id, column: 'gid'},
+            {name: 'name', column: 'name'},
+            {name: 'zinfo', columns: 'zinfo'},
+            {name: 'fid', column: 'fid'},
+            {name: 'ggid', column: 'ggid'}
+        ],
+    }
+
+    /**
+     * Generates get
+     */
+    await helpers.generateGet({
+        ...baseCfg,
+        uri: conf.uri + '.get',
+    })
+
+    await helpers.generateUpdate({
+        ...baseCfg,
+        uri: conf.uri + '.update',
+        constraint: {},
+    })
 }
 
 module.exports = {register}

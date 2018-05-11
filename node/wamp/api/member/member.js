@@ -1,17 +1,23 @@
 const helpers = require('../../helpers')
+const passwordHash = require('password-hash')
+
 async function register (conf) {
 
     const baseCfg = {
         table: 'mitglied',
         elements: [
             {name: 'id', column: 'mid'},
+            {name: 'username', column: 'uname'},
+            {name: 'password', column: 'pwd', format: (inp) => {return passwordHash.generate(inp)}},
+            {name: 'mail', column: 'mail'},
+            {name: 'fist_name', column: 'vname'},
+            {name: 'last_name', column: 'nname'},
             {name: 'sbuergerschaft', column: 'sbuergerschaft'},
             {name: 'gebdat', column: 'gebdat'},
             {name: 'zugehoerigkeit', column: 'zugehoerigkeit'},
             {name: 'geschlecht', column: 'geschlecht'},
             {name: 'rid', column: 'rid'},
             {name: 'zid', column: 'zid'},
-            {name: 'uid', column: 'uid'}
         ],
     }
 
@@ -26,7 +32,17 @@ async function register (conf) {
     await helpers.generateUpdate({
         ...baseCfg,
         uri: conf.uri + '.update',
-        constraint: {},
+        constraint: {
+            geschlecht: {
+                includes: {within: ['o', 'm', 'w']}
+            },
+            rid: {
+                inDB: {table: 'rang'}
+            },
+            zid: {
+                inDB: {table: 'zugehoerigkeit'}
+            },
+        }
     })
 
     await helpers.generateDelete({
@@ -38,26 +54,22 @@ async function register (conf) {
         ...baseCfg,
         uri: conf.uri + '.create',
         constraint: {
-            sbuergerschaft: {
-                presence: { message: '^You must choose a nationality' }
-            },
             gebdat: {
-                presence: { message: '^You must choose a date of birth ' }
+                presence: { message: '^You must choose a date of birth ' },
+                date: true,
             },
             zugehoerigkeit: {
                 presence: { message: '^You must choose a jurisdiction ' }
             },
             geschlecht: {
-                presence: { message: '^You must choose a gender ' }
+                presence: { message: '^You must choose a gender ' },
+                inclusion: {within: ['o', 'm', 'w']}
             },
             rid: {
-                presence: { message: '^You must choose a rid' }
+                inDB: {table: 'rang'}
             },
             zid: {
-                presence: { message: '^You must choose a zid ' }
-            },
-            uid: {
-                presence: { message: '^You must choose a uid ' }
+                inDB: {table: 'zugehoerigkeit'}
             },
         }
     })

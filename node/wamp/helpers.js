@@ -452,9 +452,13 @@ async function generateDelete(options) {
 async function generateCreate(options) {
     let columns = []
     let names = []
+    let formaters = {}
     for (let element of options.elements) {
         columns.push(element.column)
         names.push(element.name)
+        if('format' in element) {
+            formaters[element.name] = element.format
+        }
     }
 
     const baseInsert = 'INSERT INTO ' + options.table + ' '
@@ -471,7 +475,20 @@ async function generateCreate(options) {
         await validate(kwargs, constraints)
         await validate(kwargs.values, options.constraint)
 
-        const {dataSet, valueSet, values} = generateSqlDataValueSet(convertKeys(kwargs.values, names, columns))
+        let insert = {}
+        for(let name of names) {
+            if(name in kwargs.values) {
+                if(name in formaters) {
+                    insert[name] = formaters[name](kwargs.values[name])
+                } else {
+                    insert[name] = kwargs.values[name]
+                }
+            }
+        }
+        console.log(names)
+        console.log(insert)
+
+        const {dataSet, valueSet, values} = generateSqlDataValueSet(convertKeys(insert, names, columns))
 
         await execute(baseInsert + ' ' + dataSet + ' VALUES ' + valueSet, values)
         const row = (await execute(baseSelect))[0][0]

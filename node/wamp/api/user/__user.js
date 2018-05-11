@@ -4,10 +4,14 @@ const Component = require('../../../Component')
 
 const helpers = require('../../helpers')
 /**
- * User
+ * __user
  */
+<<<<<<< HEAD:node/wamp/api/user/user.js
 class User extends Component {
 
+=======
+class __user extends Component {
+>>>>>>> create/delete added:node/wamp/api/user/__user.js
     constructor(conf) {
         super(conf)
     }
@@ -17,15 +21,15 @@ class User extends Component {
      * @uri: testing
      * @param {Array} args Populated by Autobahn
      * @param {Object} kwargs Populated by Autobahn
-     * @param {String} kwargs.username User's username
-     * @param {String} kwargs.password User's password
-     * @param {String} kwargs.confirm_password User's confirm password
-     * @param {String} kwargs.first_name User's first name
-     * @param {String} kwargs.last_name User's last name
-     * @param {String} kwargs.mail User's email
-     * @param {String} kwargs.geschlecht User's gender. Must be one of [m, f, o]
-     * @param {Date} kwargs.gebdat User's birth date
-     * @param {String} kwargs.zugehoerigkeit User's affiliation
+     * @param {String} kwargs.username __user's username
+     * @param {String} kwargs.password __user's password
+     * @param {String} kwargs.confirm_password __user's confirm password
+     * @param {String} kwargs.first_name __user's first name
+     * @param {String} kwargs.last_name __user's last name
+     * @param {String} kwargs.mail __user's email
+     * @param {String} kwargs.geschlecht __user's gender. Must be one of [m, f, o]
+     * @param {Date} kwargs.gebdat __user's birth date
+     * @param {String} kwargs.zugehoerigkeit __user's affiliation
      * @returns {Promise<boolean>} True for Autobahn
      */
     async createUser(args, kwargs) {
@@ -105,12 +109,16 @@ class User extends Component {
      * @returns {Promise<void>} Promise to await all registers
      */
     async register() {
+<<<<<<< HEAD:node/wamp/api/user/user.js
         await helpers.s_register(this.conf.uri + '.create', this.createUser.bind(this))
+=======
+        await helpers.s_register(this.conf.uri + '.create', __user.createUser)
+>>>>>>> create/delete added:node/wamp/api/user/__user.js
     }
 }
 
 async function register (conf) {
-    let user = new User(conf)
+    let user = new __user(conf)
     await user.register()
 }
 

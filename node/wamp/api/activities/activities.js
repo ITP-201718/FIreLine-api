@@ -5,15 +5,38 @@ const helpers = require('../../helpers')
 
 async function register (conf) {
 
+    const baseCfg = {
+        table: 'aktivitaeten',
+        elements: [
+            {name: 'id', column: 'amid'},
+            {name: 'aid', column: 'aid'},
+            {name: 'mid', column: 'mid'}
+        ],
+    }
+
     /**
-     * Adds an Activity to a user
-     * Tested
-     * @param args
-     * @param kwargs
-     * @returns {Promise<boolean>}
+     * Generates get
      */
-    async function addActivityToUser(args, kwargs) {
-        const constraints = {
+    await helpers.generateGet({
+        ...baseCfg,
+        uri: conf.uri + '.get',
+    })
+
+    await helpers.generateUpdate({
+        ...baseCfg,
+        uri: conf.uri + '.update',
+        constraint: {},
+    })
+
+    await helpers.generateDelete({
+        ...baseCfg,
+        uri: conf.uri + '.delete',
+    })
+
+    await helpers.generateCreate({
+        ...baseCfg,
+        uri: conf.uri + '.create',
+        constraints: {
             aid: {
                 presence: { message: '^Internal Server Error (2000)' },
                 numericality: { onlyInteger: true }
@@ -23,43 +46,7 @@ async function register (conf) {
                 numericality: { onlyInteger: true }
             }
         }
-        await helpers.validate(kwargs, constraints)
-
-        let aktivitaetenInsert = {
-            aid: kwargs.aid,
-            mid: kwargs.mid,
-        }
-        await helpers.executeInsert('aktivitaeten', aktivitaetenInsert)
-
-        return true
-    }
-    await helpers.s_register(conf.uri + '.create_aktivitaeten', addActivityToUser)
-
-    /**
-     * Removes an Activity from a user
-     * Tested
-     * @param args
-     * @param kwargs
-     * @returns {Promise<boolean>}
-     */
-
-    async function removeActivityFromUser(args, kwargs) {
-        const constraints = {
-            aid: {
-                presence: { message: '^Internal Server Error (2002)' },
-                numericality: { onlyInteger: true }
-            },
-            mid: {
-                presence: { message: '^Internal Server Error (2003)' },
-                numericality: { onlyInteger: true }
-            }
-        }
-        helpers.validate(kwargs, constraints)
-        const {aid,mid} = kwargs
-        await helpers.execute('DELETE FROM aktivitaeten WHERE aid = :aid AND mid = :mid', {aid,mid})
-        return true
-    }
-    await helpers.s_register(conf.uri + '.remove_aktivitaeten', removeActivityFromUser)
+    })
 }
 
 module.exports = {register}

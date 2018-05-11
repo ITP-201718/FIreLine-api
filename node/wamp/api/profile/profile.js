@@ -28,7 +28,7 @@ class Profile {
                 email: {message: '^%{value} is not a valid mail address'},
             },
             uname: {
-                inDB: {table: 'user', message: '^Username does not exists'},
+                inDB: {table: 'mitglied', message: '^Username does not exists'},
                 presence: {allowEmpty: false},
             }
         }
@@ -36,7 +36,7 @@ class Profile {
         await helpers.validate(args, constraints)
 
         const {uname, mail} = args
-        await helpers.executeUpdate('user', {uname}, {mail})
+        await helpers.executeUpdate('mitglied', {uname}, {mail})
 
         return true
     }
@@ -59,7 +59,7 @@ class Profile {
                 presence: {message: '^You must enter a valid name', allowEmpty: false},
             },
             uname: {
-                inDB: {table: 'user', message: '^Username does not exists'},
+                inDB: {table: 'mitglied', message: '^Username does not exists'},
                 presence: true,
             }
         }
@@ -67,7 +67,7 @@ class Profile {
         await helpers.validate(args, constraints)
 
         const {uname, vname} = args
-        await helpers.executeUpdate('user', {uname}, {vname})
+        await helpers.executeUpdate('mitglied', {uname}, {vname})
 
         return true
     }
@@ -90,7 +90,7 @@ class Profile {
                 presence: {message: '^You must enter a valid name', allowEmpty: false},
             },
             uname: {
-                inDB: {table: 'user', message: '^Username does not exists'},
+                inDB: {table: 'mitglied', message: '^Username does not exists'},
                 presence: true,
             }
         }
@@ -98,7 +98,7 @@ class Profile {
         await helpers.validate(args, constraints)
 
         const {uname, nname} = args
-        await helpers.executeUpdate('user', {uname}, {nname})
+        await helpers.executeUpdate('mitglied', {uname}, {nname})
 
         return true
     }
@@ -123,7 +123,7 @@ class Profile {
                 length: {is: 1},
             },
             uname: {
-                inDB: {table: 'user', message: '^Username does not exists'},
+                inDB: {table: 'mitglied', message: '^Username does not exists'},
                 presence: true,
             }
         }
@@ -131,7 +131,7 @@ class Profile {
         await helpers.validate(args, constraints)
 
         const {uname, gender} = args
-        await helpers.executeUpdate(helpers.createJoinedTable('user', 'mitglied', 'uid'), {uname}, {geschlecht: gender})
+        await helpers.executeUpdate('mitglied', {uname}, {geschlecht: gender})
 
         return true
     }
@@ -148,7 +148,7 @@ class Profile {
                 date: true,
             },
             uname: {
-                inDB: {table: 'user', message: '^Username does not exists' },
+                inDB: {table: 'mitglied', message: '^Username does not exists' },
                 presence: true,
             }
         }
@@ -156,7 +156,7 @@ class Profile {
         await helpers.validate(args, constraints)
 
         const {gebdat, uname} = args
-        await helpers.executeUpdate(helpers.createJoinedTable('user', 'mitglied', 'uid'), {uname}, {gebdat})
+        await helpers.executeUpdate('mitglied', {uname}, {gebdat})
 
         return true
     }
@@ -172,7 +172,7 @@ class Profile {
                 presence: {message: '^You must choose a membership'}
             },
             uname: {
-                inDB: {table: 'user', message: '^Username does not exists'},
+                inDB: {table: 'mitglied', message: '^Username does not exists'},
                 presence: true,
             }
         }
@@ -180,7 +180,7 @@ class Profile {
         await helpers.validate(args, constraints)
 
         const {uname, zugehoerigkeit} = args
-        await helpers.executeUpdate(helpers.createJoinedTable('user', 'mitglied', 'uid'), {uname}, {zugehoerigkeit})
+        await helpers.executeUpdate('mitglied', {uname}, {zugehoerigkeit})
 
         return true
     }

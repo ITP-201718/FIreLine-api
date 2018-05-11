@@ -7,6 +7,7 @@ const helpers = require('../../helpers')
  * User
  */
 class User extends Component {
+
     constructor(conf) {
         super(conf)
     }
@@ -27,7 +28,7 @@ class User extends Component {
      * @param {String} kwargs.zugehoerigkeit User's affiliation
      * @returns {Promise<boolean>} True for Autobahn
      */
-    static async createUser(args, kwargs) {
+    async createUser(args, kwargs) {
         const constraints = {
             username: {
                 presence: {message: '^You must pick a username'},
@@ -50,6 +51,7 @@ class User extends Component {
                 presence: {message: '^You must pick a first name'}
             },
             mail: {
+                presence: {message: '^You must pick a email address'},
                 email: true,
                 notInDB: {table: 'user', message: '^Email does already exist'}
             },
@@ -76,24 +78,25 @@ class User extends Component {
             vname: kwargs.first_name,
             nname: kwargs.last_name,
             pwd: passwordHash.generate(kwargs.password),
-            mail: validate.isEmpty(kwargs.mail) ? undefined : kwargs.mail,
+            mail: kwargs.mail,
         }
 
-        await conf.sql_connection.beginTransaction()
+        await (this.conf.sql_connection.beginTransaction())
+
         await helpers.executeInsert('user', userInsert)
         await helpers.executeInsert('mitglied', {
             uid: {raw: true, value: 'LAST_INSERT_ID()'},
             gebdat: kwargs.gebdat,
             zugehoerigkeit: kwargs.zugehoerigkeit,
-            geschlecht: kwargs.gender,
+            geschlecht: kwargs.geschlecht,
         })
+
         try {
-            await conf.sql_connection.commit();
+            await this.conf.sql_connection.commit();
         } catch (e) {
-            await conf.sql_connection.rollback();
+            await this.conf.sql_connection.rollback();
             throw new Error('io.fireline.error.internal_server_error', ['Internal server error (1020)'])
         }
-
         return true
     }
 
@@ -102,7 +105,7 @@ class User extends Component {
      * @returns {Promise<void>} Promise to await all registers
      */
     async register() {
-        await helpers.s_register(this.conf.uri + '.create', User.createUser)
+        await helpers.s_register(this.conf.uri + '.create', this.createUser.bind(this))
     }
 }
 

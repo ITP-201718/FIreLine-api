@@ -478,7 +478,6 @@ async function generateCreate(options) {
         await conf.ab_session.publish(options.uri, [], {data: convertKeys(row, columns, names)})
     }
     await s_register(options.uri, create)
-
 }
 
 /**

@@ -10,7 +10,7 @@ async function register(conf) {
         console.log("Trying to authenticate '" + authid + "'")
 
         let [rows] = await helpers.execute(
-            "SELECT `uname`, `pwd` FROM `user` WHERE `uname` = :caller OR `mail` = LOWER(:caller)",
+            "SELECT `uname`, `pwd` FROM `mitglied` WHERE `uname` = :caller OR `mail` = LOWER(:caller)",
             {caller: authid}
         )
 

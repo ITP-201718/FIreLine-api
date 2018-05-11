@@ -4,80 +4,6 @@ const validate = require('validate.js')
 const helpers = require('../../helpers')
 async function register (conf){
 
-    /**
-     * Creates a new Education
-     * Tested
-     * @param args
-     * @param kwargs
-     * @returns {Promise<boolean>}
-     */
-
-    async function createAusbildung(args, kwargs){
-        const constraints = {
-            name: {
-                presence: { message: '^You must choose a name' }
-            }
-        }
-        await helpers.validate(kwargs, constraints)
-
-        let ausbildungInsert = {
-            name: kwargs.name
-        }
-
-        await helpers.executeInsert('ausbildung', ausbildungInsert)
-
-        return true
-    }
-    await helpers.s_register(conf.uri + '.create', createAusbildung)
-
-    /**
-     * Updates an existing Education
-     * Tested
-     * @param args
-     * @param kwargs
-     * @returns {Promise<boolean>}
-     */
-    /*async function updateAusbildung(args, kwargs){
-        const constraints = {
-            name: {
-                presence: { message: '^You must choose a name' }
-            },
-            id: {
-                presence: { message: 'Internal Server Error' },
-                numericality: { onlyInteger: true }
-            }
-        }
-        await helpers.validate(kwargs, constraints)
-        const {id, name} = kwargs
-        helpers.executeUpdate('ausbildung', {auid: id},{name})
-        return true
-    }
-    await helpers.s_register(conf.uri + '.update', updateAusbildung)*/
-
-    /**
-     * Removes an existing Education
-     * Tested
-     * @param args
-     * @param kwargs
-     * @returns {Promise<boolean>}
-     */
-    async function removeAusbildung(args, kwargs){
-        const contraints = {
-            id: {
-                presence: {message: '^Internal server error (1060)'},
-                numericality: { onlyInteger: true },
-                inDB: {table: 'ausbildung', row: 'auid'},
-            }
-        }
-        await helpers.validate(kwargs, contraints)
-        const {id} = kwargs
-        console.log("DELETED education: " + id)
-        // TODO: change to delete again
-        //await helpers.execute('DELETE FROM ausbildung WHERE auid = :id', {id})
-        return true
-    }
-    await helpers.s_register(conf.uri + '.remove', removeAusbildung)
-
     const baseCfg = {
         table: 'ausbildung',
         elements: [
@@ -98,6 +24,21 @@ async function register (conf){
         ...baseCfg,
         uri: conf.uri + '.update',
         constraint: {},
+    })
+
+    await helpers.generateDelete({
+        ...baseCfg,
+        uri: conf.uri + '.delete'
+    })
+
+    await helpers.generateCreate({
+        ...baseCfg,
+        uri: conf.uri + '.create',
+        constraint: {
+            name: {
+                presence: { message: '^You must choose a name' }
+            },
+        }
     })
 }
 

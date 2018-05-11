@@ -408,6 +408,79 @@ async function generateUpdate(options) {
     await s_register(options.uri, update)
 }
 
+async function generateDelete(options) {
+
+    let columns = []
+    let names = []
+    for (let element of options.elements) {
+        columns.push(element.column)
+        names.push(element.name)
+    }
+
+    const baseDelete = 'DELETE FROM ' + options.table + ' '
+    const baseSelect = 'SELECT ' + generateSqlDataSet(columns, false) + 'FROM ' + options.table
+
+    const constraints = {
+        id: {
+            presence: true,
+            numericality: {
+                onlyInteger: true,
+                greaterThan: -1,
+            },
+            inDB: {
+                table: options.table,
+                row: columns[names.indexOf('id')],
+            }
+        },
+    }
+
+    async function _delete(args, kwargs) {
+        await validate(kwargs, constraints)
+
+        const {id} = kwargs
+        const {sql, checkValues} = generateCheckSet({[columns[names.indexOf('id')]]: id})
+
+        const row = (await execute(baseSelect + ' WHERE ' + columns[names.indexOf('id')] + ' = :id LIMIT 1', {id}))[0][0]
+        await execute(baseDelete + sql, checkValues)
+        await conf.ab_session.publish(options.uri, [], {data: convertKeys(row, columns, names)})
+    }
+
+    await s_register(options.uri, _delete)
+
+}
+
+async function generateCreate(options) {
+    let columns = []
+    let names = []
+    for (let element of options.elements) {
+        columns.push(element.column)
+        names.push(element.name)
+    }
+
+    const baseInsert = 'INSERT INTO ' + options.table + ' '
+    const baseSelect = 'SELECT ' + generateSqlDataSet(columns, false) + ' FROM ' + options.table +
+        ' WHERE ' + columns[names.indexOf('id')] + ' = LAST_INSERT_ID() LIMIT 1'
+
+    const constraints = {
+        values: {
+            presence: true,
+        }
+    }
+
+    async function create(args, kwargs) {
+        await validate(kwargs, constraints)
+        await validate(kwargs.values, options.constraint)
+
+        const {dataSet, valueSet, values} = generateSqlDataValueSet(convertKeys(kwargs.values, names, columns))
+
+        await execute(baseInsert + ' ' + dataSet + ' VALUES ' + valueSet, values)
+        const row = (await execute(baseSelect))[0][0]
+        await conf.ab_session.publish(options.uri, [], {data: convertKeys(row, columns, names)})
+    }
+    await s_register(options.uri, create)
+
+}
+
 /**
  *
  * @type {{register: register, register_authid_mysql: register_authid_mysql, s_register: s_register, alreadySetSql: function(*, *, *): boolean, execute: execute, generateSqlDataValueSet: function(*=): {dataSet: string, valueSet: string|string, values: *}, generateSqlDataSet: function(*): (string|string), generateCheckSet: function(*): {sql: string, checkValues}, generateSetSet: function(*): {sql: string, setValues}, generateInsert: function(*, *=): {sql: string, values: *}, createJoinedTable: function(*, *, *): string, executeUpdate: executeUpdate, executeInsert: executeInsert, validate: validate}}
@@ -429,4 +502,6 @@ module.exports = {
     validate,
     generateGet,
     generateUpdate,
+    generateDelete,
+    generateCreate,
 }

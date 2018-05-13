@@ -12,7 +12,7 @@ async function registerGet(conf) {
             {name: 'sbuergerschaft', column: 'sbuergerschaft'},
             {name: 'birthday', column: 'gebdat'},
             {name: 'zugehoerigkeit', column: 'zugehoerigkeit'},
-            {name: 'geschlecht', column: 'geschlecht'},
+            {name: 'gender', column: 'geschlecht'},
             {name: 'rid', column: 'rid'},
             {name: 'zid', column: 'zid'},
         ],
@@ -52,7 +52,7 @@ async function registerUpdate(conf) {
             {name: 'sbuergerschaft', column: 'sbuergerschaft'},
             //{name: 'gebdat', column: 'gebdat'}, // Why not?
             //{name: 'zugehoerigkeit', column: 'zugehoerigkeit'}, // Only admin
-            //{name: 'geschlecht', column: 'geschlecht'}, // Why not?
+            //{name: 'gender', column: 'geschlecht'}, // Why not?
             //{name: 'rid', column: 'rid'}, // Only admin
             //{name: 'zid', column: 'zid'}, // Only admin
         ],

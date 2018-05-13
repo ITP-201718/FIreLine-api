@@ -1,217 +1,71 @@
+const passwordHash = require('password-hash')
 const helpers = require('../../helpers')
 
-/**
- * Profile
- * @param {object} conf Populated by index.js
- */
-class Profile {
-    constructor(conf) {
-        this.conf = conf
+async function registerGet(conf) {
+    const options = {
+        table: 'mitglied',
+        elements: [
+            {name: 'id', column: 'uname'},
+            {name: 'first_name', column: 'vname'},
+            {name: 'last_name', column: 'nname'},
+            {name: 'mail', column: 'mail'},
+            {name: 'sbuergerschaft', column: 'sbuergerschaft'},
+            {name: 'birthday', column: 'gebdat'},
+            {name: 'zugehoerigkeit', column: 'zugehoerigkeit'},
+            {name: 'geschlecht', column: 'geschlecht'},
+            {name: 'rid', column: 'rid'},
+            {name: 'zid', column: 'zid'},
+        ],
+        uri: conf.uri + '.get'
     }
 
-    /**
-     * Set mail of the current user
-     * @param args
-     * @param kwargs
-     * @param details
-     * @returns {Promise<boolean>}
-     */
-    static async setMail(args, kwargs, details) {
-        args = {
-            uname: details.caller_authid,
-            ...kwargs
-        }
-
-        const constraints = {
-            mail: {
-                presence: {message: '^You must enter a mail address', allowEmpty: false},
-                email: {message: '^%{value} is not a valid mail address'},
-            },
-            uname: {
-                inDB: {table: 'mitglied', message: '^Username does not exists'},
-                presence: {allowEmpty: false},
-            }
-        }
-
-        await helpers.validate(args, constraints)
-
-        const {uname, mail} = args
-        await helpers.executeUpdate('mitglied', {uname}, {mail})
-
-        return true
+    let columns = []
+    let names = []
+    for (let element of options.elements) {
+        columns.push(element.column)
+        names.push(element.name)
     }
 
-    /**
-     * Set firstname of the current user
-     * @param args
-     * @param kwargs
-     * @param details
-     * @returns {Promise<boolean>}
-     */
-    static async setVName(args, kwargs, details) {
-        args = {
-            uname: details.caller_authid,
-            ...kwargs
-        }
-
-        const constraints = {
-            vname: {
-                presence: {message: '^You must enter a valid name', allowEmpty: false},
-            },
-            uname: {
-                inDB: {table: 'mitglied', message: '^Username does not exists'},
-                presence: true,
-            }
-        }
-
-        await helpers.validate(args, constraints)
-
-        const {uname, vname} = args
-        await helpers.executeUpdate('mitglied', {uname}, {vname})
-
-        return true
-    }
-
-    /**
-     * Set lastname of the current user
-     * @param args
-     * @param kwargs
-     * @param details
-     * @returns {Promise<boolean>}
-     */
-    static async setNName(args, kwargs, details) {
-        args = {
-            uname: details.caller_authid,
-            ...kwargs
-        }
-
-        const constraints = {
-            nname: {
-                presence: {message: '^You must enter a valid name', allowEmpty: false},
-            },
-            uname: {
-                inDB: {table: 'mitglied', message: '^Username does not exists'},
-                presence: true,
-            }
-        }
-
-        await helpers.validate(args, constraints)
-
-        const {uname, nname} = args
-        await helpers.executeUpdate('mitglied', {uname}, {nname})
-
-        return true
-    }
-
-    /**
-     * Set the gender of the User
-     * @param args
-     * @param kwargs
-     * @param details
-     * @returns {Promise<boolean>}
-     */
-    static async setGeschlecht(args, kwargs, details) {
-
-        args = {
-            uname: details.caller_authid,
-            ...kwargs
-        }
-
-        const constraints = {
-            gender: {
-                presence: {message: '^You must choose a gender', allowEmpty: false},
-                length: {is: 1},
-            },
-            uname: {
-                inDB: {table: 'mitglied', message: '^Username does not exists'},
-                presence: true,
-            }
-        }
-
-        await helpers.validate(args, constraints)
-
-        const {uname, gender} = args
-        await helpers.executeUpdate('mitglied', {uname}, {geschlecht: gender})
-
-        return true
-    }
-
-    static async setGebDat(args, kwargs, details) {
-        args = {
-            uname: details.caller_authid,
-            ...kwargs
-        }
-
-        const constraints = {
-            gebdat: {
-                presence: {message: '^You must choose a date of birth' },
-                date: true,
-            },
-            uname: {
-                inDB: {table: 'mitglied', message: '^Username does not exists' },
-                presence: true,
-            }
-        }
-
-        await helpers.validate(args, constraints)
-
-        const {gebdat, uname} = args
-        await helpers.executeUpdate('mitglied', {uname}, {gebdat})
-
-        return true
-    }
-
-    static async setZugehoerigkeit(args, kwargs, details) {
-        args = {
-            uname: details.caller_authid,
-            ...kwargs
-        }
-
-        const constraints = {
-            zugehoerigkeit: {
-                presence: {message: '^You must choose a membership'}
-            },
-            uname: {
-                inDB: {table: 'mitglied', message: '^Username does not exists'},
-                presence: true,
-            }
-        }
-
-        await helpers.validate(args, constraints)
-
-        const {uname, zugehoerigkeit} = args
-        await helpers.executeUpdate('mitglied', {uname}, {zugehoerigkeit})
-
-        return true
-    }
-
-    /**
-     * Registers methods to Autobahn
-     * @returns {Promise<void>}
-     */
-    async register() {
-        await helpers.register_authid_mysql(this.conf.uri + '.get_vname',
-            'SELECT vname FROM user WHERE uname = :caller', 'vname')
-
-        await helpers.register_authid_mysql(this.conf.uri + '.get_nname',
-            'SELECT nname FROM user WHERE uname = :caller', 'nname')
-
-        await helpers.register_authid_mysql(this.conf.uri + '.get_mail',
-            'SELECT `mail` FROM `user` WHERE `uname` = :caller', 'mail')
-
-        await helpers.s_register(this.conf.uri + '.set_mail', Profile.setMail)
-        await helpers.s_register(this.conf.uri + '.set_vname', Profile.setVName)
-        await helpers.s_register(this.conf.uri + '.set_nname', Profile.setNName)
-        await helpers.s_register(this.conf.uri + '.set_gender', Profile.setGeschlecht)
-        await helpers.s_register(this.conf.uri + '.set_gebdat', Profile.setGebDat)
-        await helpers.s_register(this.conf.uri + '.set_Zugehoerigkeit', Profile.setZugehoerigkeit)
-    }
+    await helpers.register_authid_mysql(options.uri,
+        'SELECT ' + helpers.generateSqlDataSet(columns, false) + ' FROM ' +
+        options.table + ' WHERE uname = :caller', options.elements)
 
 }
 
-async function register (conf) {
-    let profile = new Profile(conf)
-    await profile.register()
+async function registerUpdate(conf) {
+    const updateCfg = {
+        table: 'mitglied',
+        replaceIdWithCaller: true,
+        replaceIdWithCallerColumn: 'uname',
+        idConstraint: {
+            presence: true,
+            inDB: {
+                table: 'mitglied',
+                row: 'uname',
+            }
+        },
+        elements: [
+            {name: 'id', column: 'mid'},
+            {name: 'first_name', column: 'vname'},
+            {name: 'last_name', column: 'nname'},
+            {name: 'mail', column: 'mail'},
+            {name: 'sbuergerschaft', column: 'sbuergerschaft'},
+            //{name: 'gebdat', column: 'gebdat'}, // Why not?
+            //{name: 'zugehoerigkeit', column: 'zugehoerigkeit'}, // Only admin
+            //{name: 'geschlecht', column: 'geschlecht'}, // Why not?
+            //{name: 'rid', column: 'rid'}, // Only admin
+            //{name: 'zid', column: 'zid'}, // Only admin
+        ],
+        uri: conf.uri + '.update'
+    }
+
+    await helpers.generateUpdate(updateCfg)
 }
 
-module.exports = {register}
+async function register(conf) {
+
+    await registerGet(conf)
+    await registerUpdate(conf)
+}
+
+module.exports={register}

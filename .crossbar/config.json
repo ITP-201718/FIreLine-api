@@ -33,7 +33,7 @@
                   }
                 },
                 {
-                  "uri": "io.fireline.api.profile.create_user",
+                  "uri": "io.fireline.api.member.create",
                   "match": "exact",
                   "allow": {
                     "call": true,
@@ -59,9 +59,17 @@
                   "allow": {
                     "call": true,
                     "subscribe": true
+                  }
+                },
+                {
+                  "uri": "io.fireline.api.profile",
+                  "match": "prefix",
+                  "allow": {
+                    "call": true,
+                    "subscribe": true
                   },
                   "disclose": {
-                    "caller": true
+                    "caller": false
                   }
                 }
               ]

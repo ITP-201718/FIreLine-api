@@ -39,7 +39,7 @@ async function register_authid_mysql(uri, statement, results) {
     if (typeof statement !== 'string') {
         throw 'statement needs to be a string'
     }
-    if (!(typeof results === 'string' || Array.isArray(results))) {
+    if (!(typeof results === 'string' || Array.isArray(results) || validatejs.isObject(results))) {
         throw 'results needs to a string or an array'
     }
 
@@ -57,10 +57,23 @@ async function register_authid_mysql(uri, statement, results) {
             throw autobahn.Error('io.fireline.error.no_such_user', ['No such user'])
         }
 
-        if (Array.isArray(results)) {
+        if (validatejs.isObject(results)) {
+            let columns = []
+            let names = []
+            for (let element of results) {
+                columns.push(element.column)
+                names.push(element.name)
+            }
+            let ret = {}
+            for (let i of columns) {
+                const index = columns.indexOf(i)
+                ret[names[index]] = rows[0][i]
+            }
+            return ret
+        } else if (Array.isArray(results)) {
             let ret = {}
             for (let i in results) {
-                ret[results[i]] = row[0][results[i]]
+                ret[results[i]] = rows[0][results[i]]
             }
             return ret
         } else {
@@ -341,31 +354,40 @@ function convertKeys(object, from, to) {
  * @param {String} options.table Table to get data from
  * @param {array} options.elements Array of objects. Objects: {name: 'name', column: 'column'}
  * @param {object} options.constraint Constraint to check arguments against
+ * @param {object} options.idConstraint Replace the default id constraints
+ * @param {boolean} options.replaceIdWithCaller Replace the name id with the value of caller
+ * @param {string} options.replaceIdWithCallerColumn Needs to be set if replaceIdWithCaller is true
  * @returns {Promise<void>}
  */
 async function generateUpdate(options) {
 
     let columns = []
     let names = []
+    let formaters = {}
     for (let element of options.elements) {
         columns.push(element.column)
         names.push(element.name)
+        if('format' in element) {
+            formaters[element.name] = element.format
+        }
     }
 
     const baseSelect = 'SELECT ' + generateSqlDataSet(columns, false) + ' FROM ' + options.table
 
-    const constraints = {
-        id: {
-            presence: true,
-            numericality: {
-                onlyInteger: true,
-                greaterThan: -1,
-            },
-            inDB: {
-                table: options.table,
-                row: columns[names.indexOf('id')],
-            }
+    const defaultIdConstriant = {
+        presence: true,
+        numericality: {
+            onlyInteger: true,
+            greaterThan: -1,
         },
+        inDB: {
+            table: options.table,
+            row: columns[names.indexOf('id')],
+        }
+    }
+
+    const constraints = {
+        id: (options.idConstraint ? options.idConstraint : defaultIdConstriant),
         values: {
             presence: true
         }
@@ -377,22 +399,41 @@ async function generateUpdate(options) {
      * @param {Object} kwargs Populated by Autobahn
      * @param {number} kwargs.id Id to update
      * @param {object} kwargs.values Values to update
+     * @param {object} details Populated by Autobahn
+     * @param {string|number} details.caller_authid Caller id of Autobahn
      * @returns {Promise<void>}
      */
-    async function update(args, kwargs) {
+    async function update(args, kwargs, details) {
+        if (options.replaceIdWithCaller) {
+            kwargs.id = details.caller_authid
+        }
         await validate(kwargs, constraints)
         await validate(kwargs.values, options.constraint)
+
+        if(options.replaceIdWithCaller) {
+            kwargs.id = (await execute(
+                'SELECT ' + columns[names.indexOf('id')] + ' FROM ' + options.table +
+                    ' WHERE ' + options.replaceIdWithCallerColumn + ' = :col', {col: kwargs.id})
+            )[0][0][columns[names.indexOf('id')]]
+        }
 
         const {id, values} = kwargs
 
         let updateData = {}
         for (let i in values) {
+            if (i === 'id') {
+                continue
+            }
             let index = names.indexOf(i)
             if (index === -1) {
                 console.log(options.uri, i + ' was not found in names')
                 throw new autobahn.Error('io.fireline.error.error', ['Internal server error 1081'])
             }
-            updateData[columns[index]] = values[i]
+            if (i in formaters) {
+                updateData[columns[index]] = formaters[i](values[i], args, kwargs, details)
+            } else {
+                updateData[columns[index]] = values[i]
+            }
         }
 
         updateData[columns[names.indexOf('id')]] = {
@@ -471,7 +512,7 @@ async function generateCreate(options) {
         }
     }
 
-    async function create(args, kwargs) {
+    async function create(args, kwargs, details) {
         await validate(kwargs, constraints)
         await validate(kwargs.values, options.constraint)
 
@@ -485,8 +526,6 @@ async function generateCreate(options) {
                 }
             }
         }
-        console.log(names)
-        console.log(insert)
 
         const {dataSet, valueSet, values} = generateSqlDataValueSet(convertKeys(insert, names, columns))
 

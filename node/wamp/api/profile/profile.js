@@ -13,8 +13,9 @@ async function registerGet(conf) {
             {name: 'birthday', column: 'gebdat'},
             {name: 'zugehoerigkeit', column: 'zugehoerigkeit'},
             {name: 'gender', column: 'geschlecht'},
-            {name: 'rid', column: 'rid'},
-            {name: 'zid', column: 'zid'},
+            /*{name: 'rank', substitute: {table: 'rank', colHostTable: 'rid', colGuestTable: 'rid', column: 'name'}},*/
+            /*{name: 'rid', column: 'rid'},
+            {name: 'zid', column: 'zid'},*/
         ],
         uri: conf.uri + '.get'
     }
@@ -35,17 +36,8 @@ async function registerGet(conf) {
 async function registerUpdate(conf) {
     const updateCfg = {
         table: 'mitglied',
-        replaceIdWithCaller: true,
-        replaceIdWithCallerColumn: 'uname',
-        idConstraint: {
-            presence: true,
-            inDB: {
-                table: 'mitglied',
-                row: 'uname',
-            }
-        },
         elements: [
-            {name: 'id', column: 'mid'},
+            {name: 'id', column: 'mid', replaceWith: {type: 'caller', column: 'uname'}},
             {name: 'first_name', column: 'vname'},
             {name: 'last_name', column: 'nname'},
             {name: 'mail', column: 'mail'},

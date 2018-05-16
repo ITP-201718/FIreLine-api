@@ -249,14 +249,32 @@ async function validate(attributes, constraints, options) {
  */
 async function generateGet(options) {
 
+    let addToWhere = ''
+    let tables = [options.table]
     let columns = []
     let names = []
     for (let element of options.elements) {
-        columns.push(element.column)
-        names.push(element.name)
+        console.log(element)
+        if('substitute' in element) {
+            columns.push(element.substitute.table + '.' + element.substitute.column)
+            tables.push(element.substitute.table)
+            addToWhere += ' ' + options.table + '.' + element.substitute.colHostTable + ' = '
+                + options.table + '.' + element.substitute.colGuestTable + ' AND'
+            console.log('if', addToWhere)
+        } else {
+            columns.push(options.table + '.' + element.column)
+            names.push(element.name)
+        }
     }
 
-    const baseSelect = 'SELECT ' + generateSqlDataSet(columns, false) + ' FROM ' + options.table
+    addToWhere = addToWhere.slice(0, -4)
+    if(addToWhere !== '') {
+        console.log('addToWhere', addToWhere)
+    }
+
+    const baseSelect = 'SELECT ' + generateSqlDataSet(columns, false) +
+        ' FROM ' + generateSqlDataSet(tables, false)
+
 
     let constraints = {
         order: {
@@ -297,7 +315,14 @@ async function generateGet(options) {
      * @param (number} kwargs.id Id to get data for. When used kwargs.limit_offset is set to 0
      * @returns {Promise<Array>}
      */
-    async function get(args, kwargs) {
+    async function get(args, kwargs, details) {
+        if(options.replaceIdWithCaller) {
+            kwargs.id = (await execute(
+                    'SELECT ' + columns[names.indexOf('id')] + ' FROM ' + options.table +
+                    ' WHERE ' + options.replaceIdWithCallerColumn + ' = :col', {col: details.caller_authid})
+            )[0][0][columns[names.indexOf('id')]]
+        }
+
         await validate(kwargs, constraints)
 
         let select = baseSelect;
@@ -364,9 +389,13 @@ async function generateUpdate(options) {
     let columns = []
     let names = []
     let formaters = {}
+    let replaceWiths = []
     for (let element of options.elements) {
         columns.push(element.column)
         names.push(element.name)
+        if('replaceWith' in element) {
+            replaceWiths.push(element)
+        }
         if('format' in element) {
             formaters[element.name] = element.format
         }
@@ -404,18 +433,17 @@ async function generateUpdate(options) {
      * @returns {Promise<void>}
      */
     async function update(args, kwargs, details) {
-        if (options.replaceIdWithCaller) {
-            kwargs.id = details.caller_authid
+        for(const replace of replaceWiths) {
+            if(replace.replaceWith.type === 'caller') {
+                kwargs[replace.name] = (await execute(
+                    'SELECT ' + replace.column + ' FROM ' + options.table +
+                    ' WHERE ' + replace.replaceWith.column + ' = :col', {col: details.caller_authid})
+                )[0][0][replace.column]
+            }
         }
+
         await validate(kwargs, constraints)
         await validate(kwargs.values, options.constraint)
-
-        if(options.replaceIdWithCaller) {
-            kwargs.id = (await execute(
-                'SELECT ' + columns[names.indexOf('id')] + ' FROM ' + options.table +
-                    ' WHERE ' + options.replaceIdWithCallerColumn + ' = :col', {col: kwargs.id})
-            )[0][0][columns[names.indexOf('id')]]
-        }
 
         const {id, values} = kwargs
 

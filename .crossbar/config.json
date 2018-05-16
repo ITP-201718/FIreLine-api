@@ -99,11 +99,18 @@
               "serializers": [
                 "json"
               ],
+              "cookie": {
+                "store": {
+                  "type": "file",
+                  "filename": "cookies.dat"
+                }
+              },
               "auth": {
                 "ticket": {
                   "type": "dynamic",
                   "authenticator": "io.fireline.server.authenticate"
-                }
+                },
+                "cookie": {}
               }
             },
             "server": {

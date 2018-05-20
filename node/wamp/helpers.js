@@ -116,7 +116,16 @@ async function s_register(uri, func) {
 function generateSqlDataSet(values, withParenthesis = true) {
     let ret = (withParenthesis ? '(' : '')
     for (let i of values) {
-        ret += '`' + i + '`, '
+        ret += i + ', '
+    }
+    ret = ret.slice(0, -2) + (withParenthesis ? ')' : '')
+    return ret
+}
+
+function generateSqlColumnSet(columns, withParenthesis = true, addAs=false) {
+    let ret = (withParenthesis ? '(' : '')
+    for (let i of columns) {
+        ret += i + (addAs ? ' AS \'' + i +'\'' : '' ) +', '
     }
     ret = ret.slice(0, -2) + (withParenthesis ? ')' : '')
     return ret
@@ -272,9 +281,8 @@ async function generateGet(options) {
         console.log('addToWhere', addToWhere)
     }
 
-    const baseSelect = 'SELECT ' + generateSqlDataSet(columns, false) +
+    const baseSelect = 'SELECT ' + generateSqlColumnSet(columns, false, true) +
         ' FROM ' + generateSqlDataSet(tables, false)
-
 
     let constraints = {
         order: {
@@ -316,6 +324,7 @@ async function generateGet(options) {
      * @returns {Promise<Array>}
      */
     async function get(args, kwargs, details) {
+        console.log('baseSelect: ', baseSelect)
         if(options.replaceIdWithCaller) {
             kwargs.id = (await execute(
                     'SELECT ' + columns[names.indexOf('id')] + ' FROM ' + options.table +
@@ -342,6 +351,7 @@ async function generateGet(options) {
         }
 
         let [result] = await execute(select, kwargs)
+        console.log('result', result)
         let data = []
 
         for (let res of result) {
@@ -487,7 +497,7 @@ async function generateDelete(options) {
     }
 
     const baseDelete = 'DELETE FROM ' + options.table + ' '
-    const baseSelect = 'SELECT ' + generateSqlDataSet(columns, false) + 'FROM ' + options.table
+    const baseSelect = 'SELECT ' + generateSqlDataSet(columns, false) + ' FROM ' + options.table
 
     const constraints = {
         id: {

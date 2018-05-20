@@ -10,12 +10,12 @@ async function register (conf) {
             {name: 'username', column: 'uname'},
             {name: 'password', column: 'pwd', format: (inp) => {return passwordHash.generate(inp)}},
             {name: 'mail', column: 'mail'},
-            {name: 'fist_name', column: 'vname'},
+            {name: 'first_name', column: 'vname'},
             {name: 'last_name', column: 'nname'},
             {name: 'sbuergerschaft', column: 'sbuergerschaft'},
-            {name: 'gebdat', column: 'gebdat'},
+            {name: 'birthday', column: 'gebdat'},
             {name: 'zugehoerigkeit', column: 'zugehoerigkeit'},
-            {name: 'geschlecht', column: 'geschlecht'},
+            {name: 'gender', column: 'geschlecht'},
             {name: 'rid', column: 'rid'},
             {name: 'zid', column: 'zid'},
         ],
@@ -33,8 +33,8 @@ async function register (conf) {
         ...baseCfg,
         uri: conf.uri + '.update',
         constraint: {
-            geschlecht: {
-                includes: {within: ['o', 'm', 'w']}
+            gender: {
+                inclusion: {within: ['o', 'm', 'w']}
             },
             rid: {
                 inDB: {table: 'rang'}

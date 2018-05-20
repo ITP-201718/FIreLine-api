@@ -19,9 +19,8 @@ async function execute() {
     try {
         return await conf.sql_connection.execute(...arguments)
     } catch (e) {
-        console.log(...arguments)
-        console.log(e)
-        throw new autobahn.Error('io.fireline.error.internal_server_error', ['Internal server error'])
+        console.error(e)
+        throw new autobahn.Error('io.fireline.error.internal_server_error', ['Internal server error (100)'])
     }
 }
 
@@ -263,13 +262,13 @@ async function generateGet(options) {
     let columns = []
     let names = []
     for (let element of options.elements) {
-        console.log(element)
+        //console.log(element)
         if('substitute' in element) {
             columns.push(element.substitute.table + '.' + element.substitute.column)
             tables.push(element.substitute.table)
             addToWhere += ' ' + options.table + '.' + element.substitute.colHostTable + ' = '
                 + options.table + '.' + element.substitute.colGuestTable + ' AND'
-            console.log('if', addToWhere)
+            //console.log('if', addToWhere)
         } else {
             columns.push(options.table + '.' + element.column)
             names.push(element.name)
@@ -278,7 +277,7 @@ async function generateGet(options) {
 
     addToWhere = addToWhere.slice(0, -4)
     if(addToWhere !== '') {
-        console.log('addToWhere', addToWhere)
+        //console.log('addToWhere', addToWhere)
     }
 
     const baseSelect = 'SELECT ' + generateSqlColumnSet(columns, false, true) +
@@ -324,7 +323,7 @@ async function generateGet(options) {
      * @returns {Promise<Array>}
      */
     async function get(args, kwargs, details) {
-        console.log('baseSelect: ', baseSelect)
+        //console.log('baseSelect: ', baseSelect)
         if(options.replaceIdWithCaller) {
             kwargs.id = (await execute(
                     'SELECT ' + columns[names.indexOf('id')] + ' FROM ' + options.table +
@@ -351,7 +350,7 @@ async function generateGet(options) {
         }
 
         let [result] = await execute(select, kwargs)
-        console.log('result', result)
+        //console.log('result', result)
         let data = []
 
         for (let res of result) {

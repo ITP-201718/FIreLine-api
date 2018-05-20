@@ -8,12 +8,12 @@ const {
 function register_validators() {
     v.extend(v.validators.datetime, {
         parse: (value, options) => {
-            return moment.utc(value)
+            return +moment.utc(value)
         },
 
         format: (value, options) => {
             let format = options.dateOnly ? "YYYY-MM-DD" : "YYYY-MM-DD hh:mm:ss"
-            return moment.utc(value).format(format)
+            return moment(value, format).format(format)
         }
     })
 

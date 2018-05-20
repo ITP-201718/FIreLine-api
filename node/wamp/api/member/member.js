@@ -1,14 +1,18 @@
 const helpers = require('../../helpers')
 const passwordHash = require('password-hash')
 
-async function register (conf) {
+async function register(conf) {
 
     const baseCfg = {
         table: 'mitglied',
         elements: [
             {name: 'id', column: 'mid'},
             {name: 'username', column: 'uname'},
-            {name: 'password', column: 'pwd', format: (inp) => {return passwordHash.generate(inp)}},
+            {
+                name: 'password', column: 'pwd', format: (inp) => {
+                    return passwordHash.generate(inp)
+                }
+            },
             {name: 'mail', column: 'mail'},
             {name: 'first_name', column: 'vname'},
             {name: 'last_name', column: 'nname'},
@@ -54,15 +58,35 @@ async function register (conf) {
         ...baseCfg,
         uri: conf.uri + '.create',
         constraint: {
-            gebdat: {
-                presence: { message: '^You must choose a date of birth ' },
+            username: {
+                presence: {message: '^You must choose a username', allowEmpty: false},
+                notInDB: {table: 'mitglied', row: 'uname'},
+            },
+            mail: {
+                email: { message: '^Does not seem to be a valid email'},
+                notInDB: {table: 'mitglied'},
+            },
+            first_name: {
+                presence: {message: '^You must choose a first name', allowEmpty: false}
+            },
+            last_name: {
+                presence: {message: '^You must choose a last name', allowEmpty: false}
+            },
+            password: {
+                presence: {message: '^You must choose a password', allowEmpty: false}
+            },
+            password_confirm: {
+                equality: {attribute: 'password', message: 'Is not equal to password'},
+            },
+            birthday: {
+                presence: {message: '^You must choose a date of birth', allowEmpty: false},
                 date: true,
             },
             zugehoerigkeit: {
-                presence: { message: '^You must choose a jurisdiction ' }
+                presence: {message: '^You must choose a jurisdiction ', allowEmpty: false}
             },
-            geschlecht: {
-                presence: { message: '^You must choose a gender ' },
+            gender: {
+                presence: {message: '^You must choose a gender', allowEmpty: false},
                 inclusion: {within: ['o', 'm', 'w']}
             },
             rid: {

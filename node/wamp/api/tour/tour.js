@@ -12,7 +12,7 @@ async function register (conf){
             {name: 'km_anfang', column: 'km_anfang'},
             {name: 'km_ende', column: 'km_ende'},
             {name: 'zweck', column: 'zweck'},
-            {name: 'datum', column: 'datum'},
+            {name: 'date', column: 'datum'},
             {name: 'eid', column: 'eid'},
             {name: 'mid', column: 'mid'},
             {name: 'fid', column: 'fid'}

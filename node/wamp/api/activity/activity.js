@@ -10,7 +10,7 @@ async function register (conf) {
             {name: 'id', column: 'aid'},
             {name: 'von', column: 'von'},
             {name: 'bis', column: 'bis'},
-            {name: 'taetigkeit', column: 'taetigkeit'}
+            {name: 'work', column: 'taetigkeit'}
         ],
     }
 

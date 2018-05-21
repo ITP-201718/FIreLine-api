@@ -338,7 +338,7 @@ async function generateGet(options) {
             select += ' WHERE ' + columns[names.indexOf('id')] + ' = :id'
             kwargs.limit_offset = 0
         }
-        if ('order_by' in kwargs) {
+        if ('order_by' in kwargs && kwargs.order_by) {
             kwargs.order_by = columns[names.indexOf(kwargs.order_by)]
             kwargs.order = kwargs.order ? kwargs.order : 'asc'
             select += ' ORDER BY ' + kwargs.order_by + ' ' + kwargs.order

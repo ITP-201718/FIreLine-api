@@ -82,6 +82,26 @@ function register_validators() {
         }
     }
 
+    validators.objNamesInArray = (value, options) => {
+        if(v.isEmpty(value)) {
+            return
+        }
+        if(v.isArray(options)) {
+            options = {values: options}
+        }
+        if(!v.isArray(options.values)) {
+            throw new Error('options.values is not an array. Was: ' + typeof options.values)
+        }
+        if(!v.isObject(value)) {
+            return options.message || 'is not an object'
+        }
+        for(const name of Object.keys(value)) {
+            if(!options.values.includes(name)) {
+                return options.message || 'is not includes in the list'
+            }
+        }
+    }
+
     console.log('Initialized validators')
 }
 

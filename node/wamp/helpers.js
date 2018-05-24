@@ -184,8 +184,8 @@ function generateCheckSet(check) {
     let sql = 'WHERE '
     let checkValues = {}
     for (let i in check) {
-        sql += i + ' = :check_' + i + ' AND ';
-        checkValues['check_' + i] = check[i]
+        sql += i + ' = :check_' + i.replace('.', '_') + ' AND ';
+        checkValues['check_' + i.replace('.', '_')] = check[i]
     }
     sql = sql.slice(0, -5)
     return {sql, checkValues}
@@ -308,6 +308,9 @@ async function generateGet(options) {
                 onlyInteger: true,
                 greaterThan: -1,
             },
+        },
+        filter: {
+            objNamesInArray: {values: names, message: '^Internal Server Error (500)'}
         }
     }
 
@@ -319,7 +322,8 @@ async function generateGet(options) {
      * @param {String} kwargs.order_by By what data to order by
      * @param {String} kwargs.limit How many datasets to return. Default 10. Min 1. Max 100
      * @param {String} kwargs.limit_offset From where to get datasets. Default 0. Min 0.
-     * @param (number} kwargs.id Id to get data for. When used kwargs.limit_offset is set to 0
+     * @param {object} kwargs.filter Object to filter column after (Only equals)
+     * @param {object} details Set by autobahn
      * @returns {Promise<Array>}
      */
     async function get(args, kwargs, details) {
@@ -334,9 +338,12 @@ async function generateGet(options) {
         await validate(kwargs, constraints)
 
         let select = baseSelect;
-        if (kwargs.id) {
-            select += ' WHERE ' + columns[names.indexOf('id')] + ' = :id'
-            kwargs.limit_offset = 0
+
+        if(validatejs.isObject(kwargs.filter) && !validatejs.isEmpty(kwargs.filter)) {
+            const filter = convertKeys(kwargs.filter, names, columns)
+            const {sql: checkSql, checkValues} = generateCheckSet(filter)
+            select += ' ' + checkSql
+            kwargs = {...kwargs, ...checkValues}
         }
         if ('order_by' in kwargs && kwargs.order_by) {
             kwargs.order_by = columns[names.indexOf(kwargs.order_by)]
@@ -350,7 +357,6 @@ async function generateGet(options) {
         }
 
         let [result] = await execute(select, kwargs)
-        //console.log('result', result)
         let data = []
 
         for (let res of result) {

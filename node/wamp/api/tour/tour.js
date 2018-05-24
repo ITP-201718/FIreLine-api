@@ -24,7 +24,7 @@ async function register(conf) {
                     if(data.length < 1) {
                         return 'Unbekannt'
                     }
-                    return data.first_name + ' ' + data.last_name
+                    return data[0].first_name + ' ' + data[0].last_name
                 }
             },
             {name: 'fid', column: 'fid', replace: async (v, row) => {
@@ -33,10 +33,11 @@ async function register(conf) {
                             id: v
                         }
                     })).data
+                    console.log('vehicle', data)
                     if(data.length < 1) {
                         return 'Unbekannt'
                     }
-                    return data.rufname
+                    return data[0].rufname
                 }}
         ],
     }

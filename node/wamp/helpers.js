@@ -503,9 +503,7 @@ async function generateUpdate(options) {
             raw: true,
             value: 'LAST_INSERT_ID(' + columns[names.indexOf('id')] + ')'
         }
-
-        console.log('::::::', updateData)
-
+        
         await executeUpdate(options.table, {[columns[names.indexOf('id')]]: id}, updateData)
         const row = (await execute(baseSelect + ' WHERE ' + columns[names.indexOf('id')] + ' = LAST_INSERT_ID() LIMIT 1'))[0][0]
         await conf.ab_session.publish(options.uri, [], {data: convertKeys(row, columns, names)})

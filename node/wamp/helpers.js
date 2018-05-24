@@ -261,8 +261,10 @@ async function generateGet(options) {
     let tables = [options.table]
     let columns = []
     let names = []
+    let replaces = {}
     for (let element of options.elements) {
         //console.log(element)
+        const colName = options.table + '.' + element.column
         if('substitute' in element) {
             columns.push(element.substitute.table + '.' + element.substitute.column)
             tables.push(element.substitute.table)
@@ -270,8 +272,13 @@ async function generateGet(options) {
                 + options.table + '.' + element.substitute.colGuestTable + ' AND'
             //console.log('if', addToWhere)
         } else {
-            columns.push(options.table + '.' + element.column)
-            names.push(element.name)
+            if(element.column !== null && element.name !== null) {
+                columns.push(colName)
+                names.push(element.name)
+            }
+            if('replace' in element) {
+                replaces[element.name] = element.replace
+            }
         }
     }
 
@@ -361,9 +368,20 @@ async function generateGet(options) {
 
         for (let res of result) {
             let obj = {}
+            // Gotten data => sending data
             for (let col in columns) {
                 obj[names[col]] = res[columns[col]]
             }
+            const oldObj = {...obj}
+            // Replace
+            for(const name in replaces) {
+                let value = null
+                if(names.includes(name)) {
+                    value = oldObj[name]
+                }
+                obj[name] = await replaces[name](value, oldObj)
+            }
+
             data.push(obj)
         }
 
@@ -479,10 +497,14 @@ async function generateUpdate(options) {
             }
         }
 
+        delete updateData.null
+
         updateData[columns[names.indexOf('id')]] = {
             raw: true,
             value: 'LAST_INSERT_ID(' + columns[names.indexOf('id')] + ')'
         }
+
+        console.log('::::::', updateData)
 
         await executeUpdate(options.table, {[columns[names.indexOf('id')]]: id}, updateData)
         const row = (await execute(baseSelect + ' WHERE ' + columns[names.indexOf('id')] + ' = LAST_INSERT_ID() LIMIT 1'))[0][0]

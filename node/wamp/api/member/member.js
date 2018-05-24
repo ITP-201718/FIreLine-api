@@ -20,8 +20,22 @@ async function register(conf) {
             {name: 'birthday', column: 'gebdat'},
             {name: 'zugehoerigkeit', column: 'zugehoerigkeit'},
             {name: 'gender', column: 'geschlecht'},
-            {name: 'rid', column: 'rid'},
-            {name: 'zid', column: 'zid'},
+            {name: 'rank', column: 'rid'},
+            {name: 'jurisdiction', column: 'zid'},
+            {
+                name: 'educations', column: null, replace: async (v, row) => {
+                    const data = (await conf.ab_session.call('io.fireline.api.educations.get', [], {
+                        filter: {
+                            mid: row.id,
+                        }
+                    })).data
+                    let ret = []
+                    for(const set of data) {
+                        ret.push(set.auid)
+                    }
+                    return ret
+                }
+            }
         ],
     }
 
@@ -63,7 +77,7 @@ async function register(conf) {
                 notInDB: {table: 'mitglied', row: 'uname'},
             },
             mail: {
-                email: { message: '^Does not seem to be a valid email'},
+                email: {message: '^Does not seem to be a valid email'},
                 notInDB: {table: 'mitglied'},
             },
             first_name: {

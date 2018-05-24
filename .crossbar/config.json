@@ -45,7 +45,8 @@
                   "match": "prefix",
                   "allow": {
                     "register": true,
-                    "publish": true
+                    "publish": true,
+                    "call": true
                   }
                 }
               ]
